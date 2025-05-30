@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:nahcon/models/jellyfin_item.dart';
 import 'package:nahcon/services/jellyfin_service.dart';
 import 'package:nahcon/splash.dart';
+import 'package:nahcon/theme/app_theme.dart';
 
 import 'screens/app.dart';
 import 'screens/login_screen.dart';
@@ -18,21 +20,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'nahCon',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: const AppBarTheme(centerTitle: true),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
         future: Future.wait([
           Future.delayed(const Duration(seconds: 2)),
           JellyfinService().tryAutoLogin(),
           // Preload movies in background if logged in
-          JellyfinService().getAllMovies().catchError((_) => []),
+          JellyfinService().getAllMovies().catchError((e) => <JellyfinItem>[]),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

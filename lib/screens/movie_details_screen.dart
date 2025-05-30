@@ -46,20 +46,61 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 600;
+
+    final poster = widget.movie.imageUrl != null
+        ? Hero(
+            tag:
+                'movie-poster-desktop-${widget.movie.id}', // Changed tag for desktop
+            child: Image.network(
+              widget.service.getImageUrl(widget.movie.imageUrl),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: 600,
+            ),
+          )
+        : const SizedBox.shrink();
+
     return Scaffold(
       body: FutureBuilder<JellyfinItem>(
         future: _movieDetailsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48),
+                  const SizedBox(height: 16),
+                  Text('Error: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () {
+                      setState(() {
+                        _movieDetailsFuture = _fetchMovieDetails();
+                      });
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           }
 
-          final movieDetails = snapshot.data!;
-          return Stack(
+          final movieDetails = snapshot.data;
+          if (movieDetails == null) {
+            return const Center(
+              child: Text('No movie details available'),
+            );
+          }
+
+          final content = Stack(
             children: [
               // Backdrop and Content
               CustomScrollView(
@@ -67,19 +108,41 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                   SliverAppBar(
                     expandedHeight: 400,
                     pinned: true,
-                    leading: Container(),
+                    leading: isDesktop ? Container() : BackButton(),
                     backgroundColor: Colors.black38,
                     flexibleSpace: FlexibleSpaceBar(
                       background: Hero(
-                        tag: 'movie-poster-${widget.movie.id}',
+                        tag:
+                            'movie-poster-mobile-${widget.movie.id}', // Changed tag for mobile
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            if (widget.movie.imageUrl != null)
+                            if (widget.movie.imageUrl != null && !isDesktop)
                               Image.network(
                                 widget.service
                                     .getImageUrl(widget.movie.imageUrl),
                                 fit: BoxFit.cover,
+                              ),
+                            if (isDesktop)
+                              FutureBuilder<List<String>>(
+                                future: widget.service
+                                    .getBackdropUrls(widget.movie.id),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    // fallback to poster if no backdrops
+                                    return widget.movie.imageUrl != null
+                                        ? Image.network(
+                                            widget.service.getImageUrl(
+                                                widget.movie.imageUrl),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : const SizedBox.shrink();
+                                  }
+                                  return _BackdropCarousel(
+                                    imageUrls: snapshot.data!,
+                                  );
+                                },
                               ),
                             // Top gradient for better app bar visibility
                             const DecoratedBox(
@@ -120,17 +183,41 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                         spacing: 16,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Hero(
-                            tag: 'movie-title-${widget.movie.id}',
-                            child: Material(
-                              type: MaterialType.transparency,
-                              child: Text(
-                                widget.movie.name,
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                              ),
+                          if (!isDesktop)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Hero(
+                                  tag: 'movie-title-${widget.movie.id}',
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: Text(
+                                      widget.movie.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall,
+                                    ),
+                                  ),
+                                ),
+                                FilledButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VideoScreen(
+                                          videoUrl: widget.service
+                                              .getStreamUrl(widget.movie.id),
+                                          title: widget.movie.name,
+                                          service: widget.service,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.play_arrow),
+                                  label: const Text('Play'),
+                                ),
+                              ],
                             ),
-                          ),
                           // Metadata row
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +286,9 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               future: widget.service
                                   .getSimilarItems(widget.movie.id),
                               builder: (context, snapshot) {
-                                if (!snapshot.hasData)
+                                if (!snapshot.hasData) {
                                   return const SizedBox.shrink();
+                                }
                                 return ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: snapshot.data!.length,
@@ -270,52 +358,176 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
               ),
             ],
           );
-        },
-      ),
-      floatingActionButton: FilledButton.tonal(
-        // elevation: 0,
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        // tooltip: 'Back',
-        child: const Icon(Icons.arrow_back),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 8,
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => VideoScreen(
-                        videoUrl: widget.service.getStreamUrl(widget.movie.id),
-                        title: widget.movie.name,
-                        service: widget.service,
+
+          return isDesktop
+              ? Scaffold(
+                  body: Row(
+                    children: [
+                      Material(
+                        child: SizedBox(
+                            width: 400,
+                            child: Column(
+                              children: [
+                                AppBar(),
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 8.0),
+                                      child: Material(child: poster),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        spacing: 16.0,
+                                        children: [
+                                          Expanded(
+                                            child: Hero(
+                                              tag:
+                                                  'movie-title-${widget.movie.id}',
+                                              child: Material(
+                                                type: MaterialType.transparency,
+                                                child: Text(
+                                                  widget.movie.name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headlineSmall,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: FilledButton.icon(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        VideoScreen(
+                                                      videoUrl: widget.service
+                                                          .getStreamUrl(
+                                                              widget.movie.id),
+                                                      title: widget.movie.name,
+                                                      service: widget.service,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              icon:
+                                                  const Icon(Icons.play_arrow),
+                                              label: const Text('Play'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )),
                       ),
+                      Expanded(child: content),
+                    ],
+                  ),
+                )
+              : Scaffold(
+                  body: content,
+                  bottomNavigationBar: BottomAppBar(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoScreen(
+                                    videoUrl: widget.service
+                                        .getStreamUrl(widget.movie.id),
+                                    title: widget.movie.name,
+                                    service: widget.service,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.play_arrow),
+                            label: const Text('Play'),
+                          ),
+                        ),
+                        IconButton.filledTonal(
+                          onPressed: () {
+                            debugPrint('watch later pressed');
+                          },
+                          tooltip: 'Watch Later',
+                          icon: const Icon(Icons.watch_later_outlined),
+                        ),
+                      ],
                     ),
-                  );
-                },
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Play'),
-              ),
-            ),
-            IconButton.filledTonal(
-              onPressed: () {
-                debugPrint('watch later pressed');
-              },
-              tooltip: 'Watch Later',
-              icon: const Icon(Icons.watch_later_outlined),
-            ),
-          ],
-        ),
+                  ),
+                );
+        },
       ),
+    );
+  }
+}
+
+class _BackdropCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+
+  const _BackdropCarousel({required this.imageUrls});
+
+  @override
+  State<_BackdropCarousel> createState() => _BackdropCarouselState();
+}
+
+class _BackdropCarouselState extends State<_BackdropCarousel> {
+  late PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    // Auto-scroll
+    Future.delayed(const Duration(seconds: 5), _nextPage);
+  }
+
+  void _nextPage() {
+    if (!mounted) return;
+    final nextPage = (_currentPage + 1) % widget.imageUrls.length;
+    _pageController.animateToPage(
+      nextPage,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
+    );
+    Future.delayed(const Duration(seconds: 5), _nextPage);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: _pageController,
+      onPageChanged: (index) => setState(() => _currentPage = index),
+      itemCount: widget.imageUrls.length,
+      itemBuilder: (context, index) {
+        return Image.network(
+          widget.imageUrls[index],
+          fit: BoxFit.cover,
+        );
+      },
     );
   }
 }

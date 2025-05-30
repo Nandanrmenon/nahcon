@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
+import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
+import '../utils/responsive_grid.dart';
 
 class MoviesScreen extends StatefulWidget {
   final JellyfinService service;
@@ -68,86 +70,58 @@ class _MoviesScreenState extends State<MoviesScreen> {
           onPressed: _showFilterSheet,
         ),
       ),
-      body: FutureBuilder<List<JellyfinItem>>(
-        key: ValueKey(selectedGenre), // Force rebuild on genre change
-        future: widget.service.getAllMovies(genreId: selectedGenre),
-        builder: (context, snapshot) {
-          if (_isLoading && !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasData) {
-            _isLoading = false;
-          }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isDesktop = ResponsiveGrid.isDesktop(constraints);
+          return FutureBuilder<List<JellyfinItem>>(
+            key: ValueKey(selectedGenre), // Force rebuild on genre change
+            future: widget.service.getAllMovies(genreId: selectedGenre),
+            builder: (context, snapshot) {
+              if (_isLoading && !snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasData) {
+                _isLoading = false;
+              }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
 
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.7,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final movie = snapshot.data![index];
-              return Card.outlined(
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => VideoScreen(
-                    //       videoUrl: service.getStreamUrl(movie.id),
-                    //       title: movie.name,
-                    //       service: service, // Pass the service instance
-                    //     ),
-                    //   ),
-                    // );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MovieDetailsScreen(
-                              movie: movie, service: widget.service)),
-                    );
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Hero(
-                          tag: 'movie-poster-${movie.id}',
-                          child: movie.imageUrl != null
-                              ? Image.network(
-                                  widget.service.getImageUrl(movie.imageUrl),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                )
-                              : const Center(
-                                  child: Icon(Icons.movie, size: 48),
-                                ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          movie.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                    ],
-                  ),
+              return GridView.builder(
+                padding: const EdgeInsets.all(ResponsiveGrid.gridSpacing),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: ResponsiveGrid.columnCount(constraints),
+                  childAspectRatio: ResponsiveGrid.posterAspectRatio,
+                  crossAxisSpacing: ResponsiveGrid.gridSpacing,
+                  mainAxisSpacing: ResponsiveGrid.gridSpacing,
                 ),
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final movie = snapshot.data![index];
+                  return MovieCard(
+                    title: movie.name,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MovieDetailsScreen(
+                            movie: movie,
+                            service: widget.service,
+                          ),
+                        ),
+                      );
+                    },
+                    rating: movie.rating,
+                    posterUrl: movie.imageUrl != null
+                        ? widget.service.getImageUrl(movie.imageUrl)
+                        : null,
+                  );
+                },
               );
             },
           );

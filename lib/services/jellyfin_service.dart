@@ -282,9 +282,12 @@ class JellyfinService {
     };
   }
 
-  String getImageUrl(String? imagePath) {
-    if (baseUrl == null || imagePath == null) return '';
-    return '$baseUrl$imagePath';
+  String getImageUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+    // Remove leading slash if present
+    path = path.startsWith('/') ? path.substring(1) : path;
+    return '$baseUrl/$path';
   }
 
   Future<List<JellyfinItem>> getNextUp() async {
@@ -361,6 +364,37 @@ class JellyfinService {
     throw Exception('Failed to load episodes');
   }
 
+  Future<List<String>> getBackdropUrls(String itemId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/Items/$itemId'),
+        headers: {
+          'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+          'X-Emby-Token': accessToken!,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final backdropIds = data['BackdropImageTags'] as List?;
+
+        if (backdropIds != null && backdropIds.isNotEmpty) {
+          return List.generate(
+            backdropIds.length,
+            (index) {
+              final url = '$baseUrl/Items/$itemId/Images/Backdrop/$index';
+              return url.isNotEmpty ? url : null;
+            },
+          ).where((url) => url != null).cast<String>().toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching backdrops: $e');
+      return [];
+    }
+  }
+
   Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().where((key) =>
@@ -396,6 +430,40 @@ class JellyfinService {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<List<JellyfinItem>> search(String query) async {
+    try {
+      if (accessToken == null) {
+        throw Exception('Not authenticated');
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/Items').replace(queryParameters: {
+          'SearchTerm': query,
+          'IncludeItemTypes': 'Movie,Series',
+          'Recursive': 'true',
+          'userId': userId,
+        }),
+        headers: {
+          'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+          'X-Emby-Token': accessToken!,
+        },
+      );
+
+      print('Search response: ${response.statusCode} ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return (data['Items'] as List)
+            .map((item) => JellyfinItem.fromJson(item))
+            .toList();
+      }
+      throw Exception('Failed to search items: ${response.statusCode}');
+    } catch (e) {
+      print('Search error: $e');
+      return [];
     }
   }
 }

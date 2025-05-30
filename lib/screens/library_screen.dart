@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
+import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -11,8 +12,14 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 600;
     return Scaffold(
-      appBar: AppBar(title: const Text('Jellyfin')),
+      appBar: isDesktop
+          ? PreferredSize(
+              preferredSize: Size.zero,
+              child: Container(),
+            )
+          : AppBar(title: const Text('Jellyfin')),
       body: CustomScrollView(
         slivers: [
           // Continue Playing Section
@@ -125,60 +132,31 @@ class LibraryScreen extends StatelessWidget {
               if (snapshot.hasData) {
                 return SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 250,
+                    height: 350,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         final item = snapshot.data![index];
                         return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Material(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) => MovieDetailsScreen(
-                                          movie: item, service: service)),
-                                );
-                              },
-                              child: SizedBox(
-                                width: 120,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (item.imageUrl != null)
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: Image.network(
-                                            service.getImageUrl(item.imageUrl),
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: 250,
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      const Expanded(
-                                        child: Icon(Icons.movie, size: 48),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        item.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    ),
-                                  ],
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          width: 250,
+                          child: MovieCard(
+                            title: item.name,
+                            posterUrl: item.imageUrl != null
+                                ? service.getImageUrl(item.imageUrl)
+                                : null,
+                            rating: item.rating,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MovieDetailsScreen(
+                                    movie: item,
+                                    service: service,
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                         );
                       },

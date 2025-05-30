@@ -84,81 +84,97 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 600;
+    final content = Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 16.0,
+        children: [
+          const Text(
+            'Login to Jellyfin',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          if (!_serverValidated)
+            TextFormField(
+              controller: _serverController,
+              decoration: const InputDecoration(
+                labelText: 'Server URL',
+                hintText: 'example.com:8096',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter server URL';
+                }
+                return null;
+              },
+              enabled: !_isLoading && !_serverValidated,
+            ),
+          if (_serverValidated) ...[
+            Card(
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              child: ListTile(
+                leading: const Icon(Icons.dns_outlined),
+                title: Text(_jellyfinService.serverName ?? 'Jellyfin Server'),
+                subtitle: Text(_serverController.text.trim()),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => setState(() => _serverValidated = false),
+                ),
+              ),
+            ),
+            TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: 'Username'),
+              validator: (value) =>
+                  value?.isEmpty ?? true ? 'Please enter username' : null,
+              enabled: !_isLoading,
+            ),
+            TextFormField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              validator: (value) =>
+                  value?.isEmpty ?? true ? 'Please enter password' : null,
+              enabled: !_isLoading,
+            ),
+          ],
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _isLoading
+                  ? null
+                  : (_serverValidated ? _login : _validateServer),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(),
+                    )
+                  : Text(_serverValidated ? 'Login' : 'Connect'),
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 16,
-            children: [
-              const Text(
-                'Login to Jellyfin',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              if (!_serverValidated)
-                TextFormField(
-                  controller: _serverController,
-                  decoration: const InputDecoration(
-                    labelText: 'Server URL',
-                    hintText: 'example.com:8096',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter server URL';
-                    }
-                    return null;
-                  },
-                  enabled: !_isLoading && !_serverValidated,
-                ),
-              if (_serverValidated) ...[
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 16),
-                  child: ListTile(
-                    leading: const Icon(Icons.dns_outlined),
-                    title:
-                        Text(_jellyfinService.serverName ?? 'Jellyfin Server'),
-                    subtitle: Text(_serverController.text.trim()),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => setState(() => _serverValidated = false),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isDesktop
+                ? Card(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: content,
+                      ),
                     ),
-                  ),
-                ),
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(labelText: 'Username'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter username' : null,
-                  enabled: !_isLoading,
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter password' : null,
-                  enabled: !_isLoading,
-                ),
-              ],
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  onPressed: _isLoading
-                      ? null
-                      : (_serverValidated ? _login : _validateServer),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(),
-                        )
-                      : Text(_serverValidated ? 'Login' : 'Connect'),
-                ),
-              ),
-            ],
+                  )
+                : content,
           ),
         ),
       ),
