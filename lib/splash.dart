@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,16 +46,26 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ScaleTransition(
-              scale: _animation,
-              child: const Text(
-                'nahCon',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                ),
+            // ScaleTransition(
+            //   scale: _animation,
+            //   child: const Text(
+            //     'nahCon',
+            //     style: TextStyle(
+            //       fontSize: 48,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+            const Text(
+              'nahCon',
+              style: TextStyle(
+                fontSize: 48,
               ),
-            ),
+            )
+                .animate()
+                .untint(color: Colors.white)
+                .blurXY(begin: 12, duration: Duration(milliseconds: 1000))
+                .scaleXY(begin: 1.5, duration: Duration(milliseconds: 1000)),
           ],
         ),
       ),
