@@ -32,7 +32,8 @@ class _MovieCardState extends State<MovieCard> {
       child: Card(
         elevation: _isHovered ? 8 : 0,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: EdgeInsets.all(0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Stack(
           fit: StackFit.expand,
           children: [

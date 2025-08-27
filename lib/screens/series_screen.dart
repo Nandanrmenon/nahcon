@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -38,46 +39,22 @@ class SeriesScreen extends StatelessWidget {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   final series = snapshot.data![index];
-                  return Card.outlined(
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SeriesDetailsScreen(
-                              series: series,
-                              service: service,
-                            ),
+                  return MovieCard(
+                    title: series.name,
+                    posterUrl: series.imageUrl != null
+                        ? service.getImageUrl(series.imageUrl)
+                        : null,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SeriesDetailsScreen(
+                            series: series,
+                            service: service,
                           ),
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: series.imageUrl != null
-                                ? Image.network(
-                                    service.getImageUrl(series.imageUrl),
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  )
-                                : const Center(
-                                    child: Icon(Icons.tv, size: 48),
-                                  ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              series.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   );
                 },
               );

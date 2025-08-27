@@ -121,40 +121,82 @@ class LibraryScreen extends StatelessWidget {
               ),
             ),
           ),
+          // FutureBuilder<List<JellyfinItem>>(
+          //   future: service.getRandomMovies(),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.hasData) {
+          //       return SliverToBoxAdapter(
+          //         child: SizedBox(
+          //           height: 350,
+          //           child: ListView.builder(
+          //             scrollDirection: Axis.horizontal,
+          //             itemCount: snapshot.data!.length,
+          //             itemBuilder: (context, index) {
+          //               final item = snapshot.data![index];
+          //               return Container(
+          //                 margin: const EdgeInsets.symmetric(horizontal: 8.0),
+          //                 width: 250,
+          //                 child: MovieCard(
+          //                   title: item.name,
+          //                   posterUrl: item.imageUrl != null
+          //                       ? service.getImageUrl(item.imageUrl)
+          //                       : null,
+          //                   rating: item.rating,
+          //                   onTap: () {
+          //                     Navigator.of(context).push(
+          //                       MaterialPageRoute(
+          //                         builder: (context) => MovieDetailsScreen(
+          //                           movie: item,
+          //                           service: service,
+          //                         ),
+          //                       ),
+          //                     );
+          //                   },
+          //                 ),
+          //               );
+          //             },
+          //           ),
+          //         ),
+          //       );
+          //     }
+          //     return const SliverToBoxAdapter(
+          //       child: Center(child: CircularProgressIndicator()),
+          //     );
+          //   },
+          // ),
           FutureBuilder<List<JellyfinItem>>(
             future: service.getRandomMovies(),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                final items = snapshot.data!;
                 return SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 350,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final item = snapshot.data![index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                          width: 250,
-                          child: MovieCard(
-                            title: item.name,
-                            posterUrl: item.imageUrl != null
-                                ? service.getImageUrl(item.imageUrl)
-                                : null,
-                            rating: item.rating,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => MovieDetailsScreen(
-                                    movie: item,
-                                    service: service,
-                                  ),
+                    height: 300,
+                    child: CarouselView(
+                      itemExtent: 200,
+                      shrinkExtent: 0.8,
+                      itemSnapping: true,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      children: items.map((item) {
+                        return MovieCard(
+                          title: item.name,
+                          posterUrl: item.imageUrl != null
+                              ? service.getImageUrl(item.imageUrl)
+                              : null,
+                          rating: item.rating,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MovieDetailsScreen(
+                                  movie: item,
+                                  service: service,
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         );
-                      },
+                      }).toList(),
                     ),
                   ),
                 );
