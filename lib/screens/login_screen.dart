@@ -85,38 +85,55 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
-    final content = Form(
-      key: _formKey,
-      child: Column(
-        spacing: 16.0,
-        children: [
-          SizedBox(
-            height: 250,
-            child: Center(
-              child: Text(
-                'nahCon',
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
+    final content = CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          floating: false,
+          expandedHeight: 400.0,
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          elevation: 0,
+          flexibleSpace: FlexibleSpaceBar(
+            titlePadding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 16,
+              children: [
+                SizedBox(
+                  height: 48,
+                  width: 48,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: Image.asset('assets/nahCon.png')),
+                ),
+                Text(
+                  'nahCon',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+              ],
             ),
+            centerTitle: true,
           ),
-          Expanded(
-            child: Material(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25), topRight: Radius.circular(25)),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 24.0),
+        ),
+        SliverToBoxAdapter(
+          child: Material(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              child: Form(
+                key: _formKey,
                 child: Column(
-                  spacing: 16.0,
-                  mainAxisSize: MainAxisSize.max,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       'Login to Jellyfin',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
+                    const SizedBox(height: 16),
                     if (!_serverValidated)
                       TextFormField(
                         keyboardType: TextInputType.url,
@@ -159,6 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             : null,
                         enabled: !_isLoading,
                       ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _passwordController,
                         decoration: const InputDecoration(
@@ -171,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         enabled: !_isLoading,
                       ),
                     ],
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 48,
@@ -191,42 +210,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          )
-        ],
-      ),
-      // child: CustomScrollView(
-      //   slivers: [
-      //     SliverAppBar(
-      //       pinned: true,
-      //       floating: false,
-      //       expandedHeight: 140.0,
-      //       backgroundColor: Colors.white,
-      //       elevation: 0,
-      //       flexibleSpace: FlexibleSpaceBar(
-      //         titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-      //         title: Text(
-      //           "Hello, Nandu",
-      //           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-      //                 fontWeight: FontWeight.bold,
-      //                 color: Colors.black,
-      //               ),
-      //         ),
-      //       ),
-      //     ),
-      //     SliverList(
-      //       delegate: SliverChildBuilderDelegate(
-      //         (context, index) => ListTile(
-      //           title: Text("Item $index"),
-      //         ),
-      //         childCount: 30,
-      //       ),
-      //     ),
-      //   ],
-      // ),
+          ),
+        ),
+      ],
     );
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       body: isDesktop
           ? Center(
               child: Card(

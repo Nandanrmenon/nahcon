@@ -40,6 +40,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 24,
           children: [
             // ScaleTransition(
             //   scale: _animation,
@@ -51,6 +52,18 @@ class _SplashScreenState extends State<SplashScreen>
             //     ),
             //   ),
             // ),
+            SizedBox(
+              height: 128,
+              width: 128,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(99),
+                  child: Image.asset('assets/nahCon.png')),
+            )
+                .animate()
+                .untint(color: Colors.white)
+                .blurXY(begin: 12, duration: Duration(milliseconds: 400))
+                .scaleXY(begin: 1.5, duration: Duration(milliseconds: 400)),
+
             const Text(
               'nahCon',
               style: TextStyle(
@@ -59,8 +72,8 @@ class _SplashScreenState extends State<SplashScreen>
             )
                 .animate()
                 .untint(color: Colors.white)
-                .blurXY(begin: 12, duration: Duration(milliseconds: 1000))
-                .scaleXY(begin: 1.5, duration: Duration(milliseconds: 1000)),
+                .blurXY(begin: 12, duration: Duration(milliseconds: 400))
+                .scaleXY(begin: 1.5, duration: Duration(milliseconds: 400)),
           ],
         ),
       ),
