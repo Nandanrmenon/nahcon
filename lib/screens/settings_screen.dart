@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nahcon/screens/login_screen.dart';
 
 import '../services/jellyfin_service.dart';
 
@@ -49,7 +50,12 @@ class SettingsScreen extends StatelessWidget {
             onTap: () async {
               await service.logout();
               if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
+                // Navigator.of(context).pushReplacementNamed('/login');
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(),
+                    ),
+                    (Route<dynamic> route) => false);
               }
             },
           ),
