@@ -3,6 +3,8 @@
 
 A Jellyfin video client made using Flutter.
 
+[Download](https://github.com/Nandanrmenon/nahcon/releases)
+
 ## Features
 - [x] Login into your Jellyfin server
 - [x] Display Library
