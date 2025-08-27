@@ -36,85 +36,80 @@ class LibraryScreen extends StatelessWidget {
             future: service.getNextUp(),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                final items = snapshot.data!;
                 return SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final item = snapshot.data![index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Material(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailsScreen(
-                                      movie: item,
-                                      service: service,
-                                    ),
+                    height: 250,
+                    child: CarouselView(
+                      itemExtent: 350, // width of each carousel item
+                      shrinkExtent: 0.8, // optional: shrink side items
+                      itemSnapping: true,
+                      children: items.map((item) {
+                        return Material(
+                          borderRadius: BorderRadius.circular(8.0),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MovieDetailsScreen(
+                                    movie: item,
+                                    service: service,
                                   ),
-                                );
-                              },
-                              child: SizedBox(
-                                width: 200,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (item.imageUrl != null)
-                                      Expanded(
-                                        child: Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                service
-                                                    .getImageUrl(item.imageUrl),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            const Positioned(
-                                              bottom: 8,
-                                              right: 8,
-                                              child: CircleAvatar(
-                                                backgroundColor: Colors.black54,
-                                                child: Icon(Icons.play_arrow,
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    else
-                                      const Expanded(
-                                          child: Icon(Icons.movie, size: 48)),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        item.name,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    ),
-                                  ],
                                 ),
-                              ),
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.imageUrl != null)
+                                  Expanded(
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        Image.network(
+                                          service.getImageUrl(item.imageUrl),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        const Positioned(
+                                          bottom: 8,
+                                          right: 8,
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.black54,
+                                            child: Icon(Icons.play_arrow,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 20,
+                                          left: 20,
+                                          child: Text(
+                                            item.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  const Expanded(
+                                    child: Icon(Icons.movie, size: 48),
+                                  ),
+                              ],
                             ),
                           ),
                         );
-                      },
+                      }).toList(),
                     ),
                   ),
                 );
               }
-              return const SliverToBoxAdapter(child: SizedBox.shrink());
+              return const SliverToBoxAdapter(child: SizedBox());
             },
           ),
           SliverToBoxAdapter(

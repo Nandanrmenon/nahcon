@@ -88,96 +88,158 @@ class _LoginScreenState extends State<LoginScreen> {
     final content = Form(
       key: _formKey,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         spacing: 16.0,
         children: [
-          const Text(
-            'Login to Jellyfin',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          if (!_serverValidated)
-            TextFormField(
-              controller: _serverController,
-              decoration: const InputDecoration(
-                labelText: 'Server URL',
-                hintText: 'example.com:8096',
+          SizedBox(
+            height: 250,
+            child: Center(
+              child: Text(
+                'nahCon',
+                style: Theme.of(context).textTheme.displayMedium,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter server URL';
-                }
-                return null;
-              },
-              enabled: !_isLoading && !_serverValidated,
             ),
-          if (_serverValidated) ...[
-            Card(
-              margin: const EdgeInsets.symmetric(vertical: 16),
-              child: ListTile(
-                leading: const Icon(Icons.dns_outlined),
-                title: Text(_jellyfinService.serverName ?? 'Jellyfin Server'),
-                subtitle: Text(_serverController.text.trim()),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => setState(() => _serverValidated = false),
+          ),
+          Expanded(
+            child: Material(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 24.0),
+                child: Column(
+                  spacing: 16.0,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Login to Jellyfin',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    if (!_serverValidated)
+                      TextFormField(
+                        keyboardType: TextInputType.url,
+                        controller: _serverController,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.storage),
+                          labelText: 'Server URL',
+                          hintText: 'http://example.com:8096',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter server URL';
+                          }
+                          return null;
+                        },
+                        enabled: !_isLoading && !_serverValidated,
+                      ),
+                    if (_serverValidated) ...[
+                      Card.filled(
+                        margin: const EdgeInsets.symmetric(vertical: 16),
+                        child: ListTile(
+                          leading: const Icon(Icons.dns_outlined),
+                          title: Text(
+                              _jellyfinService.serverName ?? 'Jellyfin Server'),
+                          subtitle: Text(_serverController.text.trim()),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () =>
+                                setState(() => _serverValidated = false),
+                          ),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person)),
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Please enter username'
+                            : null,
+                        enabled: !_isLoading,
+                      ),
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.password_outlined)),
+                        obscureText: true,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Please enter password'
+                            : null,
+                        enabled: !_isLoading,
+                      ),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: FilledButton(
+                        onPressed: _isLoading
+                            ? null
+                            : (_serverValidated ? _login : _validateServer),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(),
+                              )
+                            : Text(_serverValidated ? 'Login' : 'Connect'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter username' : null,
-              enabled: !_isLoading,
-            ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter password' : null,
-              enabled: !_isLoading,
-            ),
-          ],
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: FilledButton(
-              onPressed: _isLoading
-                  ? null
-                  : (_serverValidated ? _login : _validateServer),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(),
-                    )
-                  : Text(_serverValidated ? 'Login' : 'Connect'),
-            ),
-          ),
+          )
         ],
       ),
+      // child: CustomScrollView(
+      //   slivers: [
+      //     SliverAppBar(
+      //       pinned: true,
+      //       floating: false,
+      //       expandedHeight: 140.0,
+      //       backgroundColor: Colors.white,
+      //       elevation: 0,
+      //       flexibleSpace: FlexibleSpaceBar(
+      //         titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+      //         title: Text(
+      //           "Hello, Nandu",
+      //           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+      //                 fontWeight: FontWeight.bold,
+      //                 color: Colors.black,
+      //               ),
+      //         ),
+      //       ),
+      //     ),
+      //     SliverList(
+      //       delegate: SliverChildBuilderDelegate(
+      //         (context, index) => ListTile(
+      //           title: Text("Item $index"),
+      //         ),
+      //         childCount: 30,
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: isDesktop
-                ? Card(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: content,
-                      ),
-                    ),
-                  )
-                : content,
-          ),
-        ),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      body: isDesktop
+          ? Center(
+              child: Card(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: content,
+                  ),
+                ),
+              ),
+            )
+          : content,
     );
   }
 }

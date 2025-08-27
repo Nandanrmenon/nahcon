@@ -36,8 +36,6 @@ class _AppState extends State<App> {
         ? Scaffold(
             body: content,
             bottomNavigationBar: NavigationBar(
-              labelBehavior:
-                  NavigationDestinationLabelBehavior.onlyShowSelected,
               selectedIndex: _selectedIndex,
               onDestinationSelected: (index) {
                 setState(() {

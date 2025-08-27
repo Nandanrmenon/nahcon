@@ -106,7 +106,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
               CustomScrollView(
                 slivers: [
                   SliverAppBar(
-                    expandedHeight: 400,
+                    expandedHeight: 500,
                     pinned: true,
                     leading: isDesktop ? Container() : BackButton(),
                     backgroundColor: Colors.black38,
@@ -199,23 +199,23 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                     ),
                                   ),
                                 ),
-                                FilledButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => VideoScreen(
-                                          videoUrl: widget.service
-                                              .getStreamUrl(widget.movie.id),
-                                          title: widget.movie.name,
-                                          service: widget.service,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.play_arrow),
-                                  label: const Text('Play'),
-                                ),
+                                // FilledButton.icon(
+                                //   onPressed: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) => VideoScreen(
+                                //           videoUrl: widget.service
+                                //               .getStreamUrl(widget.movie.id),
+                                //           title: widget.movie.name,
+                                //           service: widget.service,
+                                //         ),
+                                //       ),
+                                //     );
+                                //   },
+                                //   icon: const Icon(Icons.play_arrow),
+                                //   label: const Text('Play'),
+                                // ),
                               ],
                             ),
                           // Metadata row

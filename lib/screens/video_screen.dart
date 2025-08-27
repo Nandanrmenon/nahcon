@@ -103,17 +103,17 @@ class _VideoScreenState extends State<VideoScreen> {
             icon: const Icon(Icons.settings),
           ),
         ],
-        bottomButtonBarMargin: EdgeInsets.only(bottom: 24, left: 48, right: 48),
+        bottomButtonBarMargin: EdgeInsets.only(bottom: 48, left: 48, right: 48),
         bottomButtonBar: [
           MaterialPositionIndicator(),
         ],
         seekBarColor: Colors.white12,
-        seekBarPositionColor: Colors.white,
-        seekBarThumbColor: Colors.white,
+        seekBarPositionColor: Theme.of(context).colorScheme.primaryFixed,
+        seekBarThumbColor: Theme.of(context).colorScheme.primaryContainer,
         seekOnDoubleTap: true,
-        seekBarMargin: EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-        seekBarHeight: 6,
-        brightnessGesture: true,
+        seekBarMargin: EdgeInsets.only(left: 48, bottom: 48, right: 48),
+        seekBarHeight: 4,
+        // brightnessGesture: true,
         volumeGesture: true,
       ),
       fullscreen: const MaterialVideoControlsThemeData(
@@ -125,18 +125,6 @@ class _VideoScreenState extends State<VideoScreen> {
       child: Scaffold(
         backgroundColor: Colors.black,
         extendBodyBehindAppBar: true,
-        // appBar: PreferredSize(
-        //   preferredSize: const Size.fromHeight(kToolbarHeight),
-        //   child: AnimatedOpacity(
-        //     opacity: _showAppBar ? 1.0 : 0.0,
-        //     duration: const Duration(milliseconds: 200),
-        //     child: AppBar(
-        //       title: Text(widget.title),
-        //       backgroundColor: Colors.black45,
-        //       systemOverlayStyle: SystemUiOverlayStyle.light,
-        //     ),
-        //   ),
-        // ),
         body: GestureDetector(
           onTap: _toggleAppBar,
           child: Video(

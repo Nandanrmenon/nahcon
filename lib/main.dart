@@ -20,7 +20,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'nahCon',
-      theme: AppTheme.darkTheme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
         future: Future.wait([
