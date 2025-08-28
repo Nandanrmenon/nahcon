@@ -21,6 +21,9 @@ class JellyfinService {
   static const String _version = '1.0.0';
   static const String _apiVersion = '10.8.10';
 
+  static const String _profilesKey = 'user_profiles';
+  static const String _currentProfileKey = 'current_profile_id';
+
   Map<String, String> get _defaultHeaders => {
         'x-emby-authorization': 'MediaBrowser '
             'Client="$_clientName", '
@@ -29,6 +32,87 @@ class JellyfinService {
             'Version="$_version"',
         'Content-Type': 'application/json',
       };
+
+  // Helper to generate a unique profile id
+  String _profileId(String serverUrl, String username) =>
+      '${serverUrl.trim()}|${username.trim()}';
+
+  // Save or update a profile (serverUrl, username, password, accessToken, userId, serverName)
+  Future<void> saveProfile({
+    required String serverUrl,
+    required String username,
+    required String password,
+    String? accessToken,
+    String? userId,
+    String? serverName,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = prefs.getStringList(_profilesKey) ?? [];
+    final id = _profileId(serverUrl, username);
+    final profile = jsonEncode({
+      'id': id,
+      'serverUrl': serverUrl,
+      'username': username,
+      'password': password,
+      'accessToken': accessToken,
+      'userId': userId,
+      'serverName': serverName,
+    });
+    // Remove old if exists
+    profiles.removeWhere((p) => jsonDecode(p)['id'] == id);
+    profiles.add(profile);
+    await prefs.setStringList(_profilesKey, profiles);
+    await prefs.setString(_currentProfileKey, id);
+  }
+
+  // Get all saved profiles
+  Future<List<Map<String, dynamic>>> getProfiles() async {
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = prefs.getStringList(_profilesKey) ?? [];
+    return profiles.map((p) => jsonDecode(p) as Map<String, dynamic>).toList();
+  }
+
+  // Set current profile by id
+  Future<void> setCurrentProfile(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_currentProfileKey, id);
+    final profiles = prefs.getStringList(_profilesKey) ?? [];
+    final profile = profiles
+        .map((p) => jsonDecode(p))
+        .firstWhere((p) => p['id'] == id, orElse: () => null);
+    if (profile != null) {
+      baseUrl = profile['serverUrl'];
+      username = profile['username'];
+      accessToken = profile['accessToken'];
+      userId = profile['userId'];
+      serverName = profile['serverName'];
+    }
+  }
+
+  // Remove a profile by id
+  Future<void> removeProfile(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = prefs.getStringList(_profilesKey) ?? [];
+    profiles.removeWhere((p) => jsonDecode(p)['id'] == id);
+    await prefs.setStringList(_profilesKey, profiles);
+    // If current profile is removed, clear current_profile_id
+    final currentId = prefs.getString(_currentProfileKey);
+    if (currentId == id) {
+      await prefs.remove(_currentProfileKey);
+    }
+  }
+
+  // Get current profile
+  Future<Map<String, dynamic>?> getCurrentProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString(_currentProfileKey);
+    if (id == null) return null;
+    final profiles = prefs.getStringList(_profilesKey) ?? [];
+    final profile = profiles
+        .map((p) => jsonDecode(p))
+        .firstWhere((p) => p['id'] == id, orElse: () => null);
+    return profile;
+  }
 
   Future<void> fetchServerInfo() async {
     final response = await http.get(
@@ -72,11 +156,16 @@ class JellyfinService {
         userId = data['User']['Id'];
         this.username = username; // Store username
 
-        // Save credentials
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('serverUrl', baseUrl!);
-        await prefs.setString('accessToken', accessToken!);
+        // Save credentials as a profile
         await fetchServerInfo();
+        await saveProfile(
+          serverUrl: baseUrl!,
+          username: username,
+          password: password,
+          accessToken: accessToken,
+          userId: userId,
+          serverName: serverName,
+        );
         return true;
       } else {
         throw Exception(
@@ -248,15 +337,20 @@ class JellyfinService {
   }
 
   Future<bool> tryAutoLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final serverUrl = prefs.getString('serverUrl');
-    final username = prefs.getString('username');
-    final password = prefs.getString('password');
-
-    if (serverUrl != null && username != null && password != null) {
+    final profile = await getCurrentProfile();
+    if (profile != null) {
       try {
-        baseUrl = serverUrl.trim();
-        return await login(serverUrl, username, password);
+        baseUrl = profile['serverUrl'];
+        username = profile['username'];
+        accessToken = profile['accessToken'];
+        userId = profile['userId'];
+        serverName = profile['serverName'];
+        // Try to login with saved credentials
+        return await login(
+          profile['serverUrl'],
+          profile['username'],
+          profile['password'],
+        );
       } catch (e) {
         baseUrl = null;
         accessToken = null;
@@ -406,7 +500,7 @@ class JellyfinService {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.remove(_currentProfileKey);
     baseUrl = null;
     accessToken = null;
     userId = null;

@@ -45,12 +45,26 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.switch_account),
+            title: const Text('Switch User'),
+            onTap: () async {
+              await service.logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
+                  (Route<dynamic> route) => false,
+                );
+              }
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
             onTap: () async {
               await service.logout();
               if (context.mounted) {
-                // Navigator.of(context).pushReplacementNamed('/login');
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                       builder: (context) => LoginScreen(),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/jellyfin_service.dart';
@@ -15,9 +17,71 @@ class _LoginScreenState extends State<LoginScreen> {
   final _serverController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FocusNode _usernameFocusNode = FocusNode(); // Add this line
   final _jellyfinService = JellyfinService();
   bool _isLoading = false;
   bool _serverValidated = false;
+
+  List<Map<String, dynamic>> _profiles = [];
+  String? _selectedServerForAddUser;
+
+  bool _showLoginForm = false;
+
+  void _enterLoginMode({String? server}) {
+    setState(() {
+      _showLoginForm = true;
+      if (server != null) {
+        _serverController.text = server;
+        _serverValidated = true;
+      } else {
+        _serverController.clear();
+        _serverValidated = false;
+      }
+    });
+    FocusScope.of(context).requestFocus(_usernameFocusNode);
+  }
+
+  void _exitLoginMode() {
+    setState(() {
+      _showLoginForm = false;
+      _serverController.clear();
+      _usernameController.clear();
+      _passwordController.clear();
+      _serverValidated = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfiles();
+  }
+
+  @override
+  void dispose() {
+    _serverController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _usernameFocusNode.dispose(); // Dispose the focus node
+    super.dispose();
+  }
+
+  Future<void> _loadProfiles() async {
+    final profiles = await _jellyfinService.getProfiles();
+    setState(() {
+      _profiles = profiles;
+    });
+  }
+
+  Future<void> _switchProfile(Map<String, dynamic> profile) async {
+    await _jellyfinService.setCurrentProfile(profile['id']);
+    final success = await _jellyfinService.tryAutoLogin();
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => App(service: _jellyfinService)),
+      );
+    }
+  }
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -30,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
         final success =
             await _jellyfinService.login(serverUrl, username, password);
         if (success && mounted) {
-          await _jellyfinService.saveCredentials(serverUrl, username, password);
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (context) => App(service: _jellyfinService)),
@@ -82,6 +145,76 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // Helper to get unique servers from profiles
+  List<String> get _uniqueServers =>
+      _profiles.map((p) => p['serverUrl'] as String).toSet().toList();
+
+  void _showAddUserDialog() async {
+    final servers = _uniqueServers;
+    String? selectedServer;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Server'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (servers.isNotEmpty)
+                DropdownButtonFormField<String>(
+                  initialValue: selectedServer,
+                  hint: const Text('Choose existing server'),
+                  items: servers
+                      .map((s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(s),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    selectedServer = val;
+                  },
+                ),
+              const Divider(),
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Or enter new server URL',
+                ),
+                onChanged: (val) {
+                  selectedServer = val;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedServer != null && selectedServer!.isNotEmpty) {
+                  setState(() {
+                    _selectedServerForAddUser = selectedServer;
+                    _serverController.text = selectedServer!;
+                    _serverValidated = servers.contains(selectedServer);
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Continue'),
+            ),
+          ],
+        );
+      },
+    );
+    // If server was selected, scroll to login form and focus username
+    if (_selectedServerForAddUser != null) {
+      FocusScope.of(context).requestFocus(_usernameFocusNode); // Use FocusNode
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
@@ -90,9 +223,15 @@ class _LoginScreenState extends State<LoginScreen> {
         SliverAppBar(
           pinned: true,
           floating: false,
-          expandedHeight: 400.0,
+          expandedHeight: _profiles.isNotEmpty ? 200 : 400.0,
           backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
           elevation: 0,
+          leading: _showLoginForm
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _exitLoginMode,
+                )
+              : null,
           flexibleSpace: FlexibleSpaceBar(
             titlePadding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
@@ -119,96 +258,131 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         SliverToBoxAdapter(
-          child: Material(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Login to Jellyfin',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    if (!_serverValidated)
-                      TextFormField(
-                        keyboardType: TextInputType.url,
-                        controller: _serverController,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.storage),
-                          labelText: 'Server URL',
-                          hintText: 'http://example.com:8096',
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (!_showLoginForm && _profiles.isNotEmpty)
+                  Column(
+                    children: [
+                      const ListTile(
+                        title: Text('Switch Profile'),
+                        subtitle: Text('Choose an existing user'),
+                      ),
+                      ..._uniqueServers.map((server) {
+                        final serverProfiles = _profiles
+                            .where((p) => p['serverUrl'] == server)
+                            .toList();
+                        return Column(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.dns),
+                              title: Text(server),
+                            ),
+                            Row(
+                              children: [
+                                // ListTile(
+                                //   leading: const Icon(Icons.dns),
+                                //   title: Text(server),
+                                //   trailing: IconButton(
+                                //     icon: const Icon(Icons.add),
+                                //     tooltip: 'Add user to this server',
+                                //     onPressed: () =>
+                                //         _enterLoginMode(server: server),
+                                //   ),
+                                // ),
+
+                                ...serverProfiles.map((profile) {
+                                  return SizedBox(
+                                    width: 150,
+                                    height: 150,
+                                    child: Card.filled(
+                                      clipBehavior: Clip.antiAlias,
+                                      child: InkWell(
+                                        onTap: () => _switchProfile(profile),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            spacing: 16.0,
+                                            children: [
+                                              const Icon(
+                                                Icons.account_circle,
+                                                size: 48,
+                                              ),
+                                              Column(
+                                                spacing: 4.0,
+                                                children: [
+                                                  Text(profile['username']),
+                                                  Text(profile['serverName'] ??
+                                                      profile['serverUrl']),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                                SizedBox(
+                                  width: 150,
+                                  height: 150,
+                                  child: Card(
+                                    clipBehavior: Clip.antiAlias,
+                                    child: InkWell(
+                                      onTap: () =>
+                                          _enterLoginMode(server: server),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.add,
+                                              size: 48,
+                                            ),
+                                            Text(
+                                              'Add user to this server',
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: FilledButton.tonal(
+                                  onPressed: () => _enterLoginMode(),
+                                  child: Text('New Server'),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter server URL';
-                          }
-                          return null;
-                        },
-                        enabled: !_isLoading && !_serverValidated,
-                      ),
-                    if (_serverValidated) ...[
-                      Card.filled(
-                        margin: const EdgeInsets.symmetric(vertical: 16),
-                        child: ListTile(
-                          leading: const Icon(Icons.dns_outlined),
-                          title: Text(
-                              _jellyfinService.serverName ?? 'Jellyfin Server'),
-                          subtitle: Text(_serverController.text.trim()),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () =>
-                                setState(() => _serverValidated = false),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                            labelText: 'Username',
-                            prefixIcon: Icon(Icons.person)),
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Please enter username'
-                            : null,
-                        enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.password_outlined)),
-                        obscureText: true,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Please enter password'
-                            : null,
-                        enabled: !_isLoading,
-                      ),
+                      )
                     ],
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: _isLoading
-                            ? null
-                            : (_serverValidated ? _login : _validateServer),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(),
-                              )
-                            : Text(_serverValidated ? 'Login' : 'Connect'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                if (_showLoginForm || _profiles.isEmpty) _buildLoginForm(),
+              ],
             ),
           ),
         ),
@@ -229,6 +403,91 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             )
           : content,
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Login to Jellyfin',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 16),
+          if (!_serverValidated)
+            TextFormField(
+              keyboardType: TextInputType.url,
+              controller: _serverController,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.storage),
+                labelText: 'Server URL',
+                hintText: 'http://example.com:8096',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter server URL';
+                }
+                return null;
+              },
+              enabled: !_isLoading && !_serverValidated,
+            ),
+          if (_serverValidated) ...[
+            Card.filled(
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              child: ListTile(
+                leading: const Icon(Icons.dns_outlined),
+                title: Text(_jellyfinService.serverName ?? 'Jellyfin Server'),
+                subtitle: Text(_serverController.text.trim()),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => setState(() => _serverValidated = false),
+                ),
+              ),
+            ),
+            TextFormField(
+              controller: _usernameController,
+              focusNode: _usernameFocusNode, // Attach FocusNode here
+              decoration: const InputDecoration(
+                  labelText: 'Username', prefixIcon: Icon(Icons.person)),
+              validator: (value) =>
+                  value?.isEmpty ?? true ? 'Please enter username' : null,
+              enabled: !_isLoading,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              decoration: const InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: Icon(Icons.password_outlined)),
+              obscureText: true,
+              // validator: (value) =>
+              //     value?.isEmpty ?? true ? 'Please enter password' : null,
+              enabled: !_isLoading,
+            ),
+          ],
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _isLoading
+                  ? null
+                  : (_serverValidated ? _login : _validateServer),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(),
+                    )
+                  : Text(_serverValidated ? 'Login' : 'Connect'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
