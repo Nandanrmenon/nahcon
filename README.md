@@ -15,6 +15,7 @@ A Jellyfin video client made using Flutter.
 - [ ] Continue watching (works but needs testing)
 - [ ] Add to watch later
 - [x] Show TV shows
+- [x] Multi user account
 
 
 ## Platform
@@ -23,6 +24,12 @@ A Jellyfin video client made using Flutter.
 - [x] macOS
 - [ ] Linux
 - [ ] Windows
+
+## Supporting
+If you’d like to support me and the development of this application (I appreciate it!), here is my Ko-Fi link!
+
+<a href='https://ko-fi.com/P5P41KEC9N' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
 
 ## Compiling the app
 Before anything, be sure to have a working flutter sdk setup.If not installed, go to [Install - Flutter](https://docs.flutter.dev/get-started/install).
