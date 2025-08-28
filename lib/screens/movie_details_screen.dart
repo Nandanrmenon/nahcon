@@ -343,71 +343,75 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
               ? Scaffold(
                   body: Row(
                     children: [
-                      Material(
-                        child: SizedBox(
-                            width: 400,
-                            child: Column(
-                              children: [
-                                AppBar(),
-                                Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: Material(child: poster),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        spacing: 16.0,
-                                        children: [
-                                          Expanded(
-                                            child: Hero(
-                                              tag:
-                                                  'movie-title-${widget.movie.id}',
-                                              child: Material(
-                                                type: MaterialType.transparency,
-                                                child: Text(
-                                                  widget.movie.name,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .headlineSmall,
+                      SingleChildScrollView(
+                        child: Material(
+                          child: SizedBox(
+                              width: 400,
+                              child: Column(
+                                children: [
+                                  AppBar(),
+                                  Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        child: Material(child: poster),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          spacing: 16.0,
+                                          children: [
+                                            Expanded(
+                                              child: Hero(
+                                                tag:
+                                                    'movie-title-${widget.movie.id}',
+                                                child: Material(
+                                                  type:
+                                                      MaterialType.transparency,
+                                                  child: Text(
+                                                    widget.movie.name,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headlineSmall,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: FilledButton.icon(
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        VideoScreen(
-                                                      videoUrl: widget.service
-                                                          .getStreamUrl(
-                                                              widget.movie.id),
-                                                      title: widget.movie.name,
-                                                      service: widget.service,
+                                            Expanded(
+                                              child: FilledButton.icon(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          VideoScreen(
+                                                        videoUrl: widget.service
+                                                            .getStreamUrl(widget
+                                                                .movie.id),
+                                                        title:
+                                                            widget.movie.name,
+                                                        service: widget.service,
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
-                                              icon: const Icon(
-                                                  Symbols.play_arrow),
-                                              label: const Text('Play'),
+                                                  );
+                                                },
+                                                icon: const Icon(
+                                                    Symbols.play_arrow),
+                                                label: const Text('Play'),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )),
+                                    ],
+                                  ),
+                                ],
+                              )),
+                        ),
                       ),
                       Expanded(child: content),
                     ],
