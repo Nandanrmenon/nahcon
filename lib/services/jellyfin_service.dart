@@ -18,7 +18,7 @@ class JellyfinService {
   static const String _clientName = 'nahCon';
   static const String _deviceId = 'flutter_app_1';
   static const String _deviceName = 'Flutter Mobile';
-  static const String _version = '1.0.0';
+  static const String _version = '1.0.1';
   static const String _apiVersion = '10.11.0';
 
   static const String _profilesKey = 'user_profiles';

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
+import 'package:nahcon/utils/constants.dart';
 
 import '../services/jellyfin_service.dart';
 
@@ -101,8 +102,8 @@ class SettingsScreen extends StatelessWidget {
           ),
           const AboutListTile(
             icon: Icon(Symbols.info),
-            applicationName: 'nahCon',
-            applicationVersion: '1.0.0',
+            applicationName: kAppName,
+            applicationVersion: kAppVersion,
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:nahcon/utils/constants.dart';
 
 import '../services/jellyfin_service.dart';
 import 'app.dart';
@@ -276,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Image.asset('assets/nahCon.png')),
                 ),
                 Text(
-                  'nahCon',
+                  kAppName,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:nahcon/utils/constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
                 .scaleXY(begin: 1.5, duration: Duration(milliseconds: 400)),
 
             const Text(
-              'nahCon',
+              kAppName,
               style: TextStyle(
                 fontSize: 48,
               ),
