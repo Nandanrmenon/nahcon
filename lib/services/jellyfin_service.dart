@@ -15,11 +15,11 @@ class JellyfinService {
   String? userId;
   String? username; // Added username property
   String? serverName;
-  static const String _clientName = 'Flutter Jellyfin App';
+  static const String _clientName = 'nahCon';
   static const String _deviceId = 'flutter_app_1';
   static const String _deviceName = 'Flutter Mobile';
   static const String _version = '1.0.0';
-  static const String _apiVersion = '10.8.10';
+  static const String _apiVersion = '10.11.0';
 
   static const String _profilesKey = 'user_profiles';
   static const String _currentProfileKey = 'current_profile_id';

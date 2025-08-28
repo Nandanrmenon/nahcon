@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -53,8 +54,8 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
         ? Hero(
             tag:
                 'movie-poster-desktop-${widget.movie.id}', // Changed tag for desktop
-            child: Image.network(
-              widget.service.getImageUrl(widget.movie.imageUrl),
+            child: CachedNetworkImage(
+              imageUrl: widget.service.getImageUrl(widget.movie.imageUrl),
               fit: BoxFit.cover,
               width: double.infinity,
               height: 600,

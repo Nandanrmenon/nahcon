@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
@@ -22,9 +23,19 @@ class SettingsScreen extends StatelessWidget {
                 if (snapshot.hasData && snapshot.data == true) {
                   return CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage(
-                      service.getUserImageUrl(),
-                      headers: service.getVideoHeaders(),
+                    backgroundImage: null,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: service.getUserImageUrl(),
+                        httpHeaders: service.getVideoHeaders(),
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.account_circle, size: 40),
+                        placeholder: (context, url) =>
+                            const Icon(Icons.account_circle, size: 40),
+                      ),
                     ),
                   );
                 }

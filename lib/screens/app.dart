@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/widgets/navbar.dart';
@@ -29,13 +30,23 @@ class _AppState extends State<App> {
         if (snapshot.hasData && snapshot.data == true) {
           return CircleAvatar(
             radius: size / 2,
-            backgroundImage: NetworkImage(
-              widget.service.getUserImageUrl(),
-              headers: widget.service.getVideoHeaders(),
+            backgroundImage: null,
+            child: ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: widget.service.getUserImageUrl(),
+                httpHeaders: widget.service.getVideoHeaders(),
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) =>
+                    Icon(Icons.account_circle, size: size),
+                placeholder: (context, url) =>
+                    Icon(Icons.account_circle, size: size),
+              ),
             ),
           );
         }
-        return Icon(Symbols.person_rounded, size: size);
+        return Icon(Icons.account_circle, size: size);
       },
     );
   }
@@ -200,18 +211,28 @@ class _AppState extends State<App> {
                 itemCount: profiles.length,
                 itemBuilder: (context, index) {
                   final profile = profiles[index];
+                  final userImageUrl = profile['userId'] != null
+                      ? '${profile['serverUrl']}/Users/${profile['userId']}/Images/Primary'
+                      : null;
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: profile['userId'] != null
-                          ? NetworkImage(
-                              '${profile['serverUrl']}/Users/${profile['userId']}/Images/Primary',
-                              headers: widget.service.getVideoHeaders(),
-                            )
-                          : null,
-                      child: profile['userId'] == null
-                          ? const Icon(Symbols.account_circle)
-                          : null,
-                    ),
+                    leading: userImageUrl != null
+                        ? CircleAvatar(
+                            backgroundImage: null,
+                            child: ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: userImageUrl,
+                                httpHeaders: widget.service.getVideoHeaders(),
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.account_circle),
+                                placeholder: (context, url) =>
+                                    const Icon(Icons.account_circle),
+                              ),
+                            ),
+                          )
+                        : const Icon(Icons.account_circle),
                     title: Text(profile['username']),
                     subtitle:
                         Text(profile['serverName'] ?? profile['serverUrl']),

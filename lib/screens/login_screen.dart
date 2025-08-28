@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -347,12 +348,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       snapshot.data == true) {
                                                     return CircleAvatar(
                                                       radius: 20,
-                                                      backgroundImage:
-                                                          NetworkImage(
-                                                        _jellyfinService
-                                                            .getUserImageUrl(),
-                                                        headers: _jellyfinService
-                                                            .getVideoHeaders(),
+                                                      backgroundImage: null,
+                                                      child: ClipOval(
+                                                        child:
+                                                            CachedNetworkImage(
+                                                          imageUrl: _jellyfinService
+                                                              .getUserImageUrl(),
+                                                          httpHeaders:
+                                                              _jellyfinService
+                                                                  .getVideoHeaders(),
+                                                          width: 40,
+                                                          height: 40,
+                                                          fit: BoxFit.cover,
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              const Icon(
+                                                                  Icons
+                                                                      .account_circle,
+                                                                  size: 40),
+                                                          placeholder: (context,
+                                                                  url) =>
+                                                              const Icon(
+                                                                  Icons
+                                                                      .account_circle,
+                                                                  size: 40),
+                                                        ),
                                                       ),
                                                     );
                                                   }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -40,10 +41,10 @@ class _MovieCardState extends State<MovieCard> {
           children: [
             // Background Image
             widget.posterUrl != null
-                ? Image.network(
-                    widget.posterUrl!,
+                ? CachedNetworkImage(
+                    imageUrl: widget.posterUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+                    errorWidget: (context, error, stackTrace) => Container(
                       color: Colors.grey[300],
                       child: const Icon(Symbols.broken_image, size: 48),
                     ),
