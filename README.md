@@ -11,6 +11,7 @@ A Jellyfin video client made using Flutter.
 - [x] Filter Media
 - [ ] Search Media
 - [x] Stream Media (requires a lot of testing)
+- [x] Change Video/Audio/Subtitle track (buggy but works)
 - [ ] Download media onto the device
 - [ ] Continue watching (works but needs testing)
 - [ ] Add to watch later
@@ -20,7 +21,7 @@ A Jellyfin video client made using Flutter.
 
 ## Platform
 - [x] Android
-- [ ] iOS (haven't tested)
+- [x] iOS (Test on iPad)
 - [x] macOS
 - [ ] Linux
 - [ ] Windows

@@ -1,2 +1,2 @@
 const kAppName = 'nahCon';
-const kAppVersion = '1.0.1';
+const kAppVersion = '1.0.2';
