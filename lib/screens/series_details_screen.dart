@@ -157,9 +157,11 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 8,
                               children: [
                                 Wrap(
                                   spacing: 8,
+                                  runSpacing: 8.0,
                                   children: [
                                     if (seriesDetails.officialRating != null)
                                       Chip(
@@ -194,20 +196,19 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                       ),
                                   ],
                                 ),
-                                if (seriesDetails.genres != null)
-                                  Wrap(
-                                    spacing: 8,
-                                    children: seriesDetails.genres
-                                            ?.map((genre) => Chip(
-                                                  label: Text(genre),
-                                                  backgroundColor:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .surfaceContainer,
-                                                ))
-                                            .toList() ??
-                                        [],
-                                  ),
+                                Wrap(
+                                  spacing: 8,
+                                  children: seriesDetails.genres
+                                          ?.map((genre) => Chip(
+                                                label: Text(genre),
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .surfaceContainer,
+                                              ))
+                                          .toList() ??
+                                      [],
+                                ),
                               ],
                             ),
                             Text(

@@ -41,9 +41,10 @@ class LibraryScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 250,
                     child: CarouselView(
-                      itemExtent: 350, // width of each carousel item
-                      shrinkExtent: 0.8, // optional: shrink side items
+                      itemExtent: 350,
+                      shrinkExtent: 0.8,
                       itemSnapping: true,
+                      enableSplash: false,
                       children: items.map((item) {
                         return Material(
                           borderRadius: BorderRadius.circular(8.0),
@@ -121,49 +122,6 @@ class LibraryScreen extends StatelessWidget {
               ),
             ),
           ),
-          // FutureBuilder<List<JellyfinItem>>(
-          //   future: service.getRandomMovies(),
-          //   builder: (context, snapshot) {
-          //     if (snapshot.hasData) {
-          //       return SliverToBoxAdapter(
-          //         child: SizedBox(
-          //           height: 350,
-          //           child: ListView.builder(
-          //             scrollDirection: Axis.horizontal,
-          //             itemCount: snapshot.data!.length,
-          //             itemBuilder: (context, index) {
-          //               final item = snapshot.data![index];
-          //               return Container(
-          //                 margin: const EdgeInsets.symmetric(horizontal: 8.0),
-          //                 width: 250,
-          //                 child: MovieCard(
-          //                   title: item.name,
-          //                   posterUrl: item.imageUrl != null
-          //                       ? service.getImageUrl(item.imageUrl)
-          //                       : null,
-          //                   rating: item.rating,
-          //                   onTap: () {
-          //                     Navigator.of(context).push(
-          //                       MaterialPageRoute(
-          //                         builder: (context) => MovieDetailsScreen(
-          //                           movie: item,
-          //                           service: service,
-          //                         ),
-          //                       ),
-          //                     );
-          //                   },
-          //                 ),
-          //               );
-          //             },
-          //           ),
-          //         ),
-          //       );
-          //     }
-          //     return const SliverToBoxAdapter(
-          //       child: Center(child: CircularProgressIndicator()),
-          //     );
-          //   },
-          // ),
           FutureBuilder<List<JellyfinItem>>(
             future: service.getRandomMovies(),
             builder: (context, snapshot) {
@@ -176,6 +134,7 @@ class LibraryScreen extends StatelessWidget {
                       itemExtent: 200,
                       shrinkExtent: 0.8,
                       itemSnapping: true,
+                      enableSplash: false,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15)),
                       children: items.map((item) {

@@ -184,39 +184,16 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (!isDesktop)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Hero(
-                                  tag: 'movie-title-${widget.movie.id}',
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: Text(
-                                      widget.movie.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ),
-                                  ),
+                            Hero(
+                              tag: 'movie-title-${widget.movie.id}',
+                              child: Material(
+                                type: MaterialType.transparency,
+                                child: Text(
+                                  widget.movie.name,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
                                 ),
-                                // FilledButton.icon(
-                                //   onPressed: () {
-                                //     Navigator.push(
-                                //       context,
-                                //       MaterialPageRoute(
-                                //         builder: (context) => VideoScreen(
-                                //           videoUrl: widget.service
-                                //               .getStreamUrl(widget.movie.id),
-                                //           title: widget.movie.name,
-                                //           service: widget.service,
-                                //         ),
-                                //       ),
-                                //     );
-                                //   },
-                                //   icon: const Icon(Icons.play_arrow),
-                                //   label: const Text('Play'),
-                                // ),
-                              ],
+                              ),
                             ),
                           // Metadata row
                           Column(
@@ -225,6 +202,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                             children: [
                               Wrap(
                                 spacing: 8,
+                                runSpacing: 8.0,
                                 children: [
                                   if (movieDetails.officialRating != null)
                                     Chip(

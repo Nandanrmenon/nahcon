@@ -134,8 +134,8 @@ class JellyfinService {
         baseUrl = baseUrl!.substring(0, baseUrl!.length - 1);
       }
 
-      print('Attempting login to: $baseUrl');
-      print('Headers: $_defaultHeaders');
+      // print('Attempting login to: $baseUrl');
+      // print('Headers: $_defaultHeaders');
 
       final response = await http.post(
         Uri.parse('$baseUrl/Users/AuthenticateByName'),
@@ -147,8 +147,8 @@ class JellyfinService {
         }),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      // print('Response status: ${response.statusCode}');
+      // print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -546,7 +546,7 @@ class JellyfinService {
         },
       );
 
-      print('Search response: ${response.statusCode} ${response.body}');
+      // print('Search response: ${response.statusCode} ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

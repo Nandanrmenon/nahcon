@@ -25,8 +25,8 @@ class JellyfinItem {
     final runTimeTicks = json['RunTimeTicks'];
     final runTimeMinutes = json['RunTimeMinutes'];
 
-    print(
-        'Runtime debug - Ticks: $runTimeTicks, Minutes: $runTimeMinutes'); // Debug
+    // print(
+    //     'Runtime debug - Ticks: $runTimeTicks, Minutes: $runTimeMinutes'); // Debug
 
     int? calculatedRuntime;
     if (runTimeMinutes != null) {
