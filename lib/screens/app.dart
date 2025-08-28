@@ -5,6 +5,7 @@ import '../services/jellyfin_service.dart';
 import 'library_screen.dart';
 import 'login_screen.dart';
 import 'movies_screen.dart';
+import 'search_screen.dart';
 import 'series_screen.dart';
 import 'settings_screen.dart';
 
@@ -48,7 +49,7 @@ class _AppState extends State<App> {
         LibraryScreen(service: widget.service),
         MoviesScreen(service: widget.service),
         SeriesScreen(service: widget.service),
-        SettingsScreen(service: widget.service),
+        SearchScreen(service: widget.service),
         SettingsScreen(service: widget.service),
       ],
     );
@@ -77,6 +78,11 @@ class _AppState extends State<App> {
                   icon: Icon(Icons.tv_outlined),
                   selectedIcon: Icon(Icons.tv),
                   label: 'Series',
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.search_outlined),
+                  selectedIcon: const Icon(Icons.search),
+                  label: 'Search',
                 ),
                 GestureDetector(
                   onLongPress: _showProfileSwitcher,
