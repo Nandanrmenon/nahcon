@@ -215,6 +215,32 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _confirmAndDeleteProfile(Map<String, dynamic> profile) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Profile'),
+        content:
+            Text('Are you sure you want to remove "${profile['username']}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _jellyfinService.removeProfile(profile['id']);
+      await _loadProfiles();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
@@ -300,6 +326,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       clipBehavior: Clip.antiAlias,
                                       child: InkWell(
                                         onTap: () => _switchProfile(profile),
+                                        onLongPress: () =>
+                                            _confirmAndDeleteProfile(profile),
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Column(
@@ -317,8 +345,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 spacing: 4.0,
                                                 children: [
                                                   Text(profile['username']),
-                                                  Text(profile['serverName'] ??
-                                                      profile['serverUrl']),
+                                                  Text(
+                                                    profile['serverName'] ??
+                                                        profile['serverUrl'],
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall,
+                                                  ),
                                                 ],
                                               ),
                                             ],
