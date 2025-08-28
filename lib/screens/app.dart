@@ -3,6 +3,7 @@ import 'package:nahcon/widgets/navbar.dart';
 
 import '../services/jellyfin_service.dart';
 import 'library_screen.dart';
+import 'login_screen.dart';
 import 'movies_screen.dart';
 import 'series_screen.dart';
 import 'settings_screen.dart';
@@ -18,6 +19,84 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   int _selectedIndex = 0;
+
+  void _showProfileSwitcher() async {
+    final profiles = await widget.service.getProfiles();
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.3,
+        expand: false,
+        builder: (context, scrollController) => CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Switch Account',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = profiles[index];
+                  return ListTile(
+                    leading: const Icon(Icons.account_circle),
+                    title: Text(profile['username']),
+                    subtitle:
+                        Text(profile['serverName'] ?? profile['serverUrl']),
+                    onTap: () async {
+                      await widget.service.setCurrentProfile(profile['id']);
+                      final success = await widget.service.tryAutoLogin();
+                      if (success && mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  App(service: widget.service),
+                            ),
+                            (Route<dynamic> route) => false);
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  height: 48,
+                  child: FilledButton.tonalIcon(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Account'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +121,7 @@ class _AppState extends State<App> {
                   _selectedIndex = index;
                 });
               },
-              destinations: const [
+              destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home),
@@ -58,52 +137,28 @@ class _AppState extends State<App> {
                   selectedIcon: Icon(Icons.tv),
                   label: 'Series',
                 ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'Account',
+                GestureDetector(
+                  onLongPress: _showProfileSwitcher,
+                  child: NavigationDestination(
+                    icon: Row(
+                      spacing: 4.0,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.person_outline),
+                        const Icon(
+                          Icons.expand_more,
+                          size: 12,
+                        ),
+                      ],
+                    ),
+                    selectedIcon: const Icon(Icons.person),
+                    label: 'Account',
+                  ),
                 ),
               ],
             ),
           )
         : Scaffold(
-            // appBar: AppBar(
-            //   title: const Text('nahCon'),
-            //   actions: [
-            //     TextButton(
-            //       child: const Text('Home'),
-            //       onPressed: () {
-            //         setState(() {
-            //           _selectedIndex = 0; // Switch to Settings
-            //         });
-            //       },
-            //     ),
-            //     TextButton(
-            //       child: const Text('Movies'),
-            //       onPressed: () {
-            //         setState(() {
-            //           _selectedIndex = 1; // Switch to Settings
-            //         });
-            //       },
-            //     ),
-            //     TextButton(
-            //       child: const Text('Series'),
-            //       onPressed: () {
-            //         setState(() {
-            //           _selectedIndex = 2; // Switch to Settings
-            //         });
-            //       },
-            //     ),
-            //     TextButton(
-            //       child: const Text('Me'),
-            //       onPressed: () {
-            //         setState(() {
-            //           _selectedIndex = 3; // Switch to Settings
-            //         });
-            //       },
-            //     ),
-            //   ],
-            // ),
             appBar: TopNav(
               service: widget.service,
               items: [
@@ -145,7 +200,6 @@ class _AppState extends State<App> {
                 ),
               ],
             ),
-
             body: content,
           );
   }
