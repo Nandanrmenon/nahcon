@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -42,14 +43,14 @@ class SearchOverlay extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     print('Error loading image: $error');
-                                    return const Icon(Icons.movie);
+                                    return const Icon(Symbols.movie);
                                   },
                                 ),
                               )
                             : const SizedBox(
                                 width: 40,
                                 height: 60,
-                                child: Icon(Icons.movie),
+                                child: Icon(Symbols.movie),
                               ),
                         Expanded(
                           child: Text(
@@ -66,7 +67,7 @@ class SearchOverlay extends StatelessWidget {
           if (suggestions.length > 5)
             ListTile(
               title: const Text('View all results'),
-              trailing: const Icon(Icons.arrow_forward),
+              trailing: const Icon(Symbols.arrow_forward),
               onTap: onViewAll,
             ),
         ],

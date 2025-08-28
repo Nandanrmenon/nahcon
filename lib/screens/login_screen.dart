@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../services/jellyfin_service.dart';
 import 'app.dart';
@@ -255,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
           elevation: 0,
           leading: _showLoginForm
               ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Symbols.arrow_back),
                   onPressed: _exitLoginMode,
                 )
               : null,
@@ -303,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         return Column(
                           children: [
                             ListTile(
-                              leading: const Icon(Icons.dns),
+                              leading: const Icon(Symbols.dns),
                               title: Text(server),
                             ),
                             Row(
@@ -356,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     );
                                                   }
                                                   return const Icon(
-                                                      Icons.account_circle,
+                                                      Symbols.account_circle,
                                                       size: 40);
                                                 },
                                               ),
@@ -397,7 +398,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               MainAxisAlignment.center,
                                           children: [
                                             const Icon(
-                                              Icons.add,
+                                              Symbols.add,
                                               size: 48,
                                             ),
                                             Text(
@@ -475,7 +476,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.url,
               controller: _serverController,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.storage),
+                prefixIcon: Icon(Symbols.storage),
                 labelText: 'Server URL',
                 hintText: 'http://example.com:8096',
               ),
@@ -491,11 +492,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Card.filled(
               margin: const EdgeInsets.symmetric(vertical: 16),
               child: ListTile(
-                leading: const Icon(Icons.dns_outlined),
+                leading: const Icon(Symbols.dns_rounded),
                 title: Text(_jellyfinService.serverName ?? 'Jellyfin Server'),
                 subtitle: Text(_serverController.text.trim()),
                 trailing: IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Symbols.edit),
                   onPressed: () => setState(() => _serverValidated = false),
                 ),
               ),
@@ -504,7 +505,8 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: _usernameController,
               focusNode: _usernameFocusNode, // Attach FocusNode here
               decoration: const InputDecoration(
-                  labelText: 'Username', prefixIcon: Icon(Icons.person)),
+                  labelText: 'Username',
+                  prefixIcon: Icon(Symbols.person_rounded)),
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter username' : null,
               enabled: !_isLoading,
@@ -514,7 +516,7 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: _passwordController,
               decoration: const InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: Icon(Icons.password_outlined)),
+                  prefixIcon: Icon(Symbols.password_rounded)),
               obscureText: true,
               // validator: (value) =>
               //     value?.isEmpty ?? true ? 'Please enter password' : null,

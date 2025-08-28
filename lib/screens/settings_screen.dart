@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
 
 import '../services/jellyfin_service.dart';
@@ -27,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   );
                 }
-                return const Icon(Icons.account_circle, size: 40);
+                return const Icon(Symbols.account_circle, size: 40);
               },
             ),
             title: const Text('Account'),
@@ -47,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.delete),
+            leading: const Icon(Symbols.delete),
             title: const Text('Clear Cache'),
             onTap: () async {
               await service.clearCache();
@@ -59,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.switch_account),
+            leading: const Icon(Symbols.switch_account),
             title: const Text('Switch User'),
             onTap: () async {
               await service.logout();
@@ -74,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.logout),
+            leading: const Icon(Symbols.logout),
             title: const Text('Logout'),
             onTap: () async {
               await service.logout();
@@ -88,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           const AboutListTile(
-            icon: Icon(Icons.info),
+            icon: Icon(Symbols.info),
             applicationName: 'nahCon',
             applicationVersion: '1.0.0',
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/video_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -70,7 +71,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
               widget.service.getImageUrl(widget.series.imageUrl),
               fit: BoxFit.cover,
             )
-          : const Center(child: Icon(Icons.tv, size: 48)),
+          : const Center(child: Icon(Symbols.tv, size: 48)),
     );
 
     final content = FutureBuilder<List<dynamic>>(
@@ -166,7 +167,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                     if (seriesDetails.officialRating != null)
                                       Chip(
                                         avatar: Icon(
-                                          Icons.family_restroom,
+                                          Symbols.family_restroom,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .primary,
@@ -177,7 +178,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                       ),
                                     if (widget.series.rating != null)
                                       Chip(
-                                        avatar: const Icon(Icons.star,
+                                        avatar: const Icon(Symbols.star,
                                             color: Colors.amber, size: 18),
                                         label: Text(widget.series.rating!
                                             .toStringAsFixed(1)),
@@ -185,7 +186,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                     if (seriesDetails.runtime != null)
                                       Chip(
                                         avatar: Icon(
-                                          Icons.timer_outlined,
+                                          Symbols.timer_rounded,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .primary,
@@ -464,7 +465,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                             ),
                                           );
                                         },
-                                        icon: const Icon(Icons.play_arrow),
+                                        icon: const Icon(Symbols.play_arrow),
                                         label: const Text('Play'),
                                       ),
                                     ),
@@ -546,7 +547,7 @@ class _BackdropCarouselState extends State<_BackdropCarousel> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 print('Error loading image: $error');
-                return const Center(child: Icon(Icons.error));
+                return const Center(child: Icon(Symbols.error));
               },
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -76,7 +77,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48),
+                  const Icon(Symbols.error_outline, size: 48),
                   const SizedBox(height: 16),
                   Text('Error: ${snapshot.error}'),
                   const SizedBox(height: 16),
@@ -207,7 +208,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                   if (movieDetails.officialRating != null)
                                     Chip(
                                       avatar: Icon(
-                                        Icons.family_restroom,
+                                        Symbols.family_restroom_rounded,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .primary,
@@ -217,7 +218,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                     ),
                                   if (widget.movie.rating != null)
                                     Chip(
-                                      avatar: const Icon(Icons.star,
+                                      avatar: const Icon(Symbols.star_rounded,
                                           color: Colors.amber, size: 18),
                                       label: Text(widget.movie.rating!
                                           .toStringAsFixed(1)),
@@ -225,7 +226,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                   if (movieDetails.runtime != null)
                                     Chip(
                                       avatar: Icon(
-                                        Icons.timer_outlined,
+                                        Symbols.timer_rounded,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .primary,
@@ -394,8 +395,8 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                                   ),
                                                 );
                                               },
-                                              icon:
-                                                  const Icon(Icons.play_arrow),
+                                              icon: const Icon(
+                                                  Symbols.play_arrow),
                                               label: const Text('Play'),
                                             ),
                                           ),
@@ -421,30 +422,38 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                       spacing: 8,
                       children: [
                         Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VideoScreen(
-                                    videoUrl: widget.service
-                                        .getStreamUrl(widget.movie.id),
-                                    title: widget.movie.name,
-                                    service: widget.service,
+                          child: SizedBox(
+                            height: 48,
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoScreen(
+                                      videoUrl: widget.service
+                                          .getStreamUrl(widget.movie.id),
+                                      title: widget.movie.name,
+                                      service: widget.service,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.play_arrow),
-                            label: const Text('Play'),
+                                );
+                              },
+                              icon: const Icon(Symbols.play_arrow),
+                              label: const Text('Play'),
+                            ),
                           ),
                         ),
-                        IconButton.filledTonal(
-                          onPressed: () {
-                            debugPrint('watch later pressed');
-                          },
-                          tooltip: 'Watch Later',
-                          icon: const Icon(Icons.watch_later_outlined),
+                        Tooltip(
+                          message: 'Watch Later',
+                          child: SizedBox(
+                            height: 48,
+                            child: FilledButton.tonal(
+                              onPressed: () {
+                                debugPrint('watch later pressed');
+                              },
+                              child: const Icon(Symbols.watch_later_rounded),
+                            ),
+                          ),
                         ),
                       ],
                     ),

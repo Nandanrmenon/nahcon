@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/widgets/movie_card.dart';
 
@@ -25,7 +26,7 @@ class LibraryScreen extends StatelessWidget {
           // Continue Playing Section
           SliverToBoxAdapter(
             child: ListTile(
-              leading: const Icon(Icons.play_circle_outline),
+              leading: const Icon(Symbols.resume_rounded),
               title: Text(
                 'Next Up',
                 style: Theme.of(context).textTheme.labelLarge,
@@ -77,7 +78,8 @@ class LibraryScreen extends StatelessWidget {
                                           right: 8,
                                           child: CircleAvatar(
                                             backgroundColor: Colors.black54,
-                                            child: Icon(Icons.play_arrow,
+                                            child: Icon(
+                                                Symbols.play_arrow_rounded,
                                                 color: Colors.white),
                                           ),
                                         ),
@@ -99,7 +101,7 @@ class LibraryScreen extends StatelessWidget {
                                   )
                                 else
                                   const Expanded(
-                                    child: Icon(Icons.movie, size: 48),
+                                    child: Icon(Symbols.movie, size: 48),
                                   ),
                               ],
                             ),
@@ -115,7 +117,7 @@ class LibraryScreen extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: ListTile(
-              leading: const Icon(Icons.shuffle),
+              leading: const Icon(Symbols.shuffle_rounded),
               title: Text(
                 'Random',
                 style: Theme.of(context).textTheme.labelLarge,

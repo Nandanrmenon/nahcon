@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
 import 'package:nahcon/services/jellyfin_service.dart'; // Import the service
@@ -65,11 +66,11 @@ class _TopNavState extends State<TopNav> {
                     controller.openView();
                   },
                   elevation: WidgetStatePropertyAll(0),
-                  leading: const Icon(Icons.search),
+                  leading: const Icon(Symbols.search),
                   hintText: 'Search movies and series',
                 )
               : IconButton(
-                  icon: const Icon(Icons.search),
+                  icon: const Icon(Symbols.search),
                   onPressed: () {
                     controller.openView();
                   },
@@ -114,7 +115,7 @@ class _TopNavState extends State<TopNav> {
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         print('Error loading image: $error');
-                                        return const Icon(Icons.movie);
+                                        return const Icon(Symbols.movie);
                                       },
                                     ),
                                   ),
@@ -122,7 +123,7 @@ class _TopNavState extends State<TopNav> {
                               : const SizedBox(
                                   width: 40,
                                   height: 60,
-                                  child: Icon(Icons.movie),
+                                  child: Icon(Symbols.movie),
                                 ),
                           Expanded(
                             child: Text(
@@ -151,7 +152,7 @@ class _TopNavState extends State<TopNav> {
                     : const SizedBox(
                         width: 40,
                         height: 60,
-                        child: Icon(Icons.movie),
+                        child: Icon(Symbols.movie),
                       ),
                 title: Text(item.name),
                 onTap: () {

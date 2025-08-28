@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class MovieCard extends StatefulWidget {
   final String title;
@@ -44,12 +45,12 @@ class _MovieCardState extends State<MovieCard> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 48),
+                      child: const Icon(Symbols.broken_image, size: 48),
                     ),
                   )
                 : Container(
                     color: Colors.grey[300],
-                    child: const Icon(Icons.movie, size: 48),
+                    child: const Icon(Symbols.movie, size: 48),
                   ),
             // Hover Overlay
             AnimatedContainer(
@@ -69,8 +70,9 @@ class _MovieCardState extends State<MovieCard> {
                 opacity: _isHovered ? 1.0 : 0.0,
                 child: const Center(
                   child: Icon(
-                    Icons.play_circle,
+                    Symbols.play_circle,
                     size: 48,
+                    fill: 1,
                     color: Colors.white,
                   ),
                 ),
@@ -105,7 +107,8 @@ class _MovieCardState extends State<MovieCard> {
                     if (_isHovered && widget.rating != null)
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const Icon(Symbols.star,
+                              color: Colors.amber, size: 16),
                           const SizedBox(width: 4),
                           Text(
                             widget.rating!.toStringAsFixed(1),

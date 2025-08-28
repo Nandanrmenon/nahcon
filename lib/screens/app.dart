@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/widgets/navbar.dart';
 
 import '../services/jellyfin_service.dart';
@@ -34,7 +35,7 @@ class _AppState extends State<App> {
             ),
           );
         }
-        return Icon(Icons.account_circle, size: size);
+        return Icon(Symbols.person_rounded, size: size);
       },
     );
   }
@@ -65,23 +66,35 @@ class _AppState extends State<App> {
               },
               destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
+                  icon: Icon(Symbols.home_rounded),
+                  selectedIcon: Icon(
+                    Symbols.home_rounded,
+                    fill: 1.0,
+                  ),
                   label: 'Home',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.movie_outlined),
-                  selectedIcon: Icon(Icons.movie),
+                  icon: Icon(Symbols.movie_rounded),
+                  selectedIcon: Icon(
+                    Symbols.movie_rounded,
+                    fill: 1.0,
+                  ),
                   label: 'Movies',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.tv_outlined),
-                  selectedIcon: Icon(Icons.tv),
+                  icon: Icon(Symbols.tv_rounded),
+                  selectedIcon: Icon(
+                    Symbols.tv_rounded,
+                    fill: 1.0,
+                  ),
                   label: 'Series',
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.search_outlined),
-                  selectedIcon: const Icon(Icons.search),
+                  icon: Icon(Symbols.search_rounded),
+                  selectedIcon: Icon(
+                    Symbols.search_rounded,
+                    fill: 1.0,
+                  ),
                   label: 'Search',
                 ),
                 GestureDetector(
@@ -92,7 +105,7 @@ class _AppState extends State<App> {
                       children: [
                         _buildUserAvatar(),
                         const SizedBox(width: 4),
-                        const Icon(Icons.expand_more, size: 12),
+                        const Icon(Symbols.expand_all_rounded, size: 12),
                       ],
                     ),
                     selectedIcon: Row(
@@ -100,7 +113,7 @@ class _AppState extends State<App> {
                       children: [
                         _buildUserAvatar(),
                         const SizedBox(width: 4),
-                        const Icon(Icons.expand_more, size: 12),
+                        const Icon(Symbols.expand_all_rounded, size: 12),
                       ],
                     ),
                     label: 'Account',
@@ -196,7 +209,7 @@ class _AppState extends State<App> {
                             )
                           : null,
                       child: profile['userId'] == null
-                          ? const Icon(Icons.account_circle)
+                          ? const Icon(Symbols.account_circle)
                           : null,
                     ),
                     title: Text(profile['username']),
@@ -231,7 +244,7 @@ class _AppState extends State<App> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(Symbols.add),
                     label: const Text('Add Account'),
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
 import 'package:nahcon/utils/responsive_grid.dart';
@@ -68,7 +69,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   )
                 : IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: const Icon(Symbols.clear),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _results = null);

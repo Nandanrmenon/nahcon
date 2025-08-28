@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -87,7 +88,7 @@ class _VideoScreenState extends State<VideoScreen> {
           IconButton(
               color: Colors.white,
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back)),
+              icon: const Icon(Symbols.arrow_back)),
           const Spacer(),
           Text(widget.title,
               style: const TextStyle(
@@ -100,7 +101,7 @@ class _VideoScreenState extends State<VideoScreen> {
             onPressed: () {
               debugPrint('Custom "Settings" button pressed.');
             },
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Symbols.settings),
           ),
         ],
         bottomButtonBarMargin: EdgeInsets.only(bottom: 48, left: 48, right: 48),
