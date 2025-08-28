@@ -1,3 +1,4 @@
+val defaultApplicationId by extra("com.nahnah.nahcon")
 allprojects {
     repositories {
         google()

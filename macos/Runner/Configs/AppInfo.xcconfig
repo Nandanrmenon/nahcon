@@ -8,7 +8,7 @@
 PRODUCT_NAME = nahcon
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.nahcon
+PRODUCT_BUNDLE_IDENTIFIER = com.nahnah.nahcon
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.nahnah. All rights reserved.

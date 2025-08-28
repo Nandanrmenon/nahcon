@@ -1,4 +1,4 @@
-package com.example.nahcon
+package com.nahnah.nahcon
 
 import io.flutter.embedding.android.FlutterActivity
 
