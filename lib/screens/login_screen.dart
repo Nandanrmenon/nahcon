@@ -308,19 +308,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               leading: const Icon(Symbols.dns),
                               title: Text(server),
                             ),
-                            Row(
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                // ListTile(
-                                //   leading: const Icon(Icons.dns),
-                                //   title: Text(server),
-                                //   trailing: IconButton(
-                                //     icon: const Icon(Icons.add),
-                                //     tooltip: 'Add user to this server',
-                                //     onPressed: () =>
-                                //         _enterLoginMode(server: server),
-                                //   ),
-                                // ),
-
                                 ...serverProfiles.map((profile) {
                                   return SizedBox(
                                     width: 150,
