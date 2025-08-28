@@ -53,7 +53,17 @@ class _AppState extends State<App> {
                 itemBuilder: (context, index) {
                   final profile = profiles[index];
                   return ListTile(
-                    leading: const Icon(Icons.account_circle),
+                    leading: CircleAvatar(
+                      backgroundImage: profile['userId'] != null
+                          ? NetworkImage(
+                              '${profile['serverUrl']}/Users/${profile['userId']}/Images/Primary',
+                              headers: widget.service.getVideoHeaders(),
+                            )
+                          : null,
+                      child: profile['userId'] == null
+                          ? const Icon(Icons.account_circle)
+                          : null,
+                    ),
                     title: Text(profile['username']),
                     subtitle:
                         Text(profile['serverName'] ?? profile['serverUrl']),
@@ -95,6 +105,24 @@ class _AppState extends State<App> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildUserAvatar({double size = 24}) {
+    return FutureBuilder<bool>(
+      future: widget.service.hasUserImage(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data == true) {
+          return CircleAvatar(
+            radius: size / 2,
+            backgroundImage: NetworkImage(
+              widget.service.getUserImageUrl(),
+              headers: widget.service.getVideoHeaders(),
+            ),
+          );
+        }
+        return Icon(Icons.account_circle, size: size);
+      },
     );
   }
 
@@ -141,17 +169,21 @@ class _AppState extends State<App> {
                   onLongPress: _showProfileSwitcher,
                   child: NavigationDestination(
                     icon: Row(
-                      spacing: 4.0,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.person_outline),
-                        const Icon(
-                          Icons.expand_more,
-                          size: 12,
-                        ),
+                        _buildUserAvatar(),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.expand_more, size: 12),
                       ],
                     ),
-                    selectedIcon: const Icon(Icons.person),
+                    selectedIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildUserAvatar(),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.expand_more, size: 12),
+                      ],
+                    ),
                     label: 'Account',
                   ),
                 ),

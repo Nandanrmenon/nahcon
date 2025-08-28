@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final FocusNode _usernameFocusNode = FocusNode(); // Add this line
   final _jellyfinService = JellyfinService();
+
   bool _isLoading = false;
   bool _serverValidated = false;
 
@@ -337,9 +338,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 MainAxisAlignment.center,
                                             spacing: 16.0,
                                             children: [
-                                              const Icon(
-                                                Icons.account_circle,
-                                                size: 48,
+                                              FutureBuilder<bool>(
+                                                future: _jellyfinService
+                                                    .hasUserImage(),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.hasData &&
+                                                      snapshot.data == true) {
+                                                    return CircleAvatar(
+                                                      radius: 20,
+                                                      backgroundImage:
+                                                          NetworkImage(
+                                                        _jellyfinService
+                                                            .getUserImageUrl(),
+                                                        headers: _jellyfinService
+                                                            .getVideoHeaders(),
+                                                      ),
+                                                    );
+                                                  }
+                                                  return const Icon(
+                                                      Icons.account_circle,
+                                                      size: 40);
+                                                },
                                               ),
                                               Column(
                                                 spacing: 4.0,

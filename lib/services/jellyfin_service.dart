@@ -560,4 +560,25 @@ class JellyfinService {
       return [];
     }
   }
+
+  String getUserImageUrl() {
+    if (baseUrl == null || userId == null) return '';
+    return '$baseUrl/Users/$userId/Images/Primary';
+  }
+
+  Future<bool> hasUserImage() async {
+    if (baseUrl == null || userId == null) return false;
+    try {
+      final response = await http.head(
+        Uri.parse(getUserImageUrl()),
+        headers: {
+          'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+          'X-Emby-Token': accessToken!,
+        },
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }

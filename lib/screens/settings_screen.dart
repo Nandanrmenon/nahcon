@@ -15,7 +15,21 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-            leading: const Icon(Icons.person),
+            leading: FutureBuilder<bool>(
+              future: service.hasUserImage(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data == true) {
+                  return CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(
+                      service.getUserImageUrl(),
+                      headers: service.getVideoHeaders(),
+                    ),
+                  );
+                }
+                return const Icon(Icons.account_circle, size: 40);
+              },
+            ),
             title: const Text('Account'),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
