@@ -8,6 +8,7 @@ class JellyfinItem {
   final int? runtime;
   final String? officialRating;
   final List<String>? genres;
+  final int? year;
 
   JellyfinItem({
     required this.id,
@@ -19,14 +20,12 @@ class JellyfinItem {
     this.runtime,
     this.officialRating,
     this.genres,
+    this.year,
   });
 
   factory JellyfinItem.fromJson(Map<String, dynamic> json) {
     final runTimeTicks = json['RunTimeTicks'];
     final runTimeMinutes = json['RunTimeMinutes'];
-
-    // print(
-    //     'Runtime debug - Ticks: $runTimeTicks, Minutes: $runTimeMinutes'); // Debug
 
     int? calculatedRuntime;
     if (runTimeMinutes != null) {
@@ -47,6 +46,7 @@ class JellyfinItem {
       runtime: calculatedRuntime,
       officialRating: json['OfficialRating'],
       genres: json['Genres'] != null ? List<String>.from(json['Genres']) : null,
+      year: json['ProductionYear'],
     );
   }
 }

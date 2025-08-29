@@ -88,7 +88,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
             CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 400,
+                  expandedHeight: 500,
                   pinned: true,
                   leading: isDesktop ? Container() : BackButton(),
                   backgroundColor: Colors.black38,
@@ -152,9 +152,24 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 16,
                           children: [
-                            Text(
-                              widget.series.name,
-                              style: Theme.of(context).textTheme.headlineSmall,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.series.name,
+                                  style: Theme.of(context).textTheme.headlineSmall,
+                                ),
+                                Text(
+                                  widget.series.year.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant),
+                                ),
+                              ],
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

@@ -114,8 +114,8 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                     backgroundColor: Colors.black38,
                     flexibleSpace: FlexibleSpaceBar(
                       background: Hero(
-                        tag:
-                            'movie-poster-mobile-${widget.movie.id}', // Changed tag for mobile
+                        tag: 'movie-poster-mobile-${widget.movie.id}',
+                        // Changed tag for mobile
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
@@ -190,10 +190,28 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               tag: 'movie-title-${widget.movie.id}',
                               child: Material(
                                 type: MaterialType.transparency,
-                                child: Text(
-                                  widget.movie.name,
-                                  style:
-                                      Theme.of(context).textTheme.headlineSmall,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.movie.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall,
+                                    ),
+                                    if (movieDetails.year != null)
+                                      Text(
+                                        widget.movie.year.toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant),
+                                      ),
+                                    // Text(widget.movie.)
+                                  ],
                                 ),
                               ),
                             ),
