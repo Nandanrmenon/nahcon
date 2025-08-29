@@ -61,7 +61,7 @@ class _AppState extends State<App> {
         LibraryScreen(service: widget.service),
         MoviesScreen(service: widget.service),
         SeriesScreen(service: widget.service),
-        SearchScreen(service: widget.service),
+        if (!isDesktop) SearchScreen(service: widget.service),
         SettingsScreen(service: widget.service),
       ],
     );

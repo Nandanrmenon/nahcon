@@ -248,13 +248,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
-    final content = CustomScrollView(
+    final loginContent = CustomScrollView(
       slivers: [
         SliverAppBar(
           pinned: true,
           floating: false,
           expandedHeight: _profiles.isNotEmpty ? 200 : 400.0,
-          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          backgroundColor: isDesktop
+              ? Theme.of(context).colorScheme.surface
+              : Theme.of(context).colorScheme.secondaryContainer,
           elevation: 0,
           leading: _showLoginForm
               ? IconButton(
@@ -457,17 +459,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: isDesktop
           ? Center(
-              child: Card(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: content,
-                  ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: loginContent,
                 ),
               ),
             )
-          : content,
+          : loginContent,
     );
   }
 
