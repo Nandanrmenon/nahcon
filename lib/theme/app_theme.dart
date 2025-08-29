@@ -18,6 +18,15 @@ ThemeData darkTheme({ColorScheme? dynamicScheme}) {
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       year2023: false,
     ),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: const PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.iOS: const PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.linux: const PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.macOS: const PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.windows: const PredictiveBackPageTransitionsBuilder(),
+      },
+    ),
   );
 }
 
