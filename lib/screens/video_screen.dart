@@ -35,6 +35,9 @@ class _VideoScreenState extends State<VideoScreen> {
   bool _showAppBar = true;
   Timer? _hideTimer;
 
+  // Add this to track last mouse position for desktop
+  Offset? _lastMousePosition;
+
   void _toggleAppBar() {
     setState(() {
       _showAppBar = !_showAppBar;
@@ -207,65 +210,119 @@ class _VideoScreenState extends State<VideoScreen> {
     );
   }
 
+  void _showControls() {
+    if (!_showAppBar) {
+      setState(() {
+        _showAppBar = true;
+      });
+    }
+    _resetHideTimer();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialVideoControlsTheme(
-      normal: MaterialVideoControlsThemeData(
-        // Modify theme options:
+    bool isDesktop = TargetPlatform.macOS == Theme.of(context).platform ||
+        TargetPlatform.linux == Theme.of(context).platform ||
+        TargetPlatform.windows == Theme.of(context).platform;
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.space): () {
+          player.playOrPause();
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () async {
+          final pos = player.state.position;
+          player.seek(pos + const Duration(seconds: 10));
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () async {
+          final pos = player.state.position;
+          player.seek(pos - const Duration(seconds: 10));
+        },
+        const SingleActivator(LogicalKeyboardKey.keyC): () async {
+          final current = player.state.track.subtitle;
+          if (current != SubtitleTrack.no()) {
+            await player.setSubtitleTrack(SubtitleTrack.no());
+          } else if (player.state.tracks.subtitle.isNotEmpty) {
+            await player.setSubtitleTrack(player.state.tracks.subtitle.first);
+          }
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: MaterialVideoControlsTheme(
+          normal: MaterialVideoControlsThemeData(
+            // Modify theme options:
 
-        buttonBarButtonSize: 24.0,
-        buttonBarButtonColor: Colors.white,
-        // Modify top button bar:
+            buttonBarButtonSize: 24.0,
+            buttonBarButtonColor: Colors.white,
+            // Modify top button bar:
 
-        topButtonBar: [
-          IconButton(
-              color: Colors.white,
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Symbols.arrow_back)),
-          const Spacer(),
-          Text(widget.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              )),
-          const Spacer(),
-          MaterialDesktopCustomButton(
-            onPressed: () async {
-              _showTrackSelector();
-              // debugPrint('Custom "Settings" button pressed.');
-            },
-            icon: const Icon(Symbols.settings),
+            topButtonBar: [
+              IconButton(
+                  color: Colors.white,
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Symbols.arrow_back)),
+              const Spacer(),
+              Text(widget.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  )),
+              const Spacer(),
+              MaterialDesktopCustomButton(
+                onPressed: () async {
+                  _showTrackSelector();
+                  // debugPrint('Custom "Settings" button pressed.');
+                },
+                icon: const Icon(Symbols.settings),
+              ),
+            ],
+            bottomButtonBarMargin:
+                EdgeInsets.only(bottom: 48, left: 48, right: 48),
+            bottomButtonBar: [
+              MaterialPositionIndicator(),
+            ],
+            seekBarColor: Colors.white12,
+            seekBarPositionColor: Theme.of(context).colorScheme.primaryFixed,
+            seekBarThumbColor: Theme.of(context).colorScheme.primaryContainer,
+            seekOnDoubleTap: true,
+            seekBarMargin: EdgeInsets.only(left: 48, bottom: 48, right: 48),
+            seekBarHeight: 4,
+            brightnessGesture: true,
+            volumeGesture: true,
           ),
-        ],
-        bottomButtonBarMargin: EdgeInsets.only(bottom: 48, left: 48, right: 48),
-        bottomButtonBar: [
-          MaterialPositionIndicator(),
-        ],
-        seekBarColor: Colors.white12,
-        seekBarPositionColor: Theme.of(context).colorScheme.primaryFixed,
-        seekBarThumbColor: Theme.of(context).colorScheme.primaryContainer,
-        seekOnDoubleTap: true,
-        seekBarMargin: EdgeInsets.only(left: 48, bottom: 48, right: 48),
-        seekBarHeight: 4,
-        brightnessGesture: true,
-        volumeGesture: true,
-      ),
-      fullscreen: const MaterialVideoControlsThemeData(
-        // Modify fullscreen options:
+          fullscreen: const MaterialVideoControlsThemeData(
+            // Modify fullscreen options:
 
-        buttonBarButtonSize: 32.0,
-        buttonBarButtonColor: Colors.white,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        extendBodyBehindAppBar: true,
-        body: GestureDetector(
-          onTap: _toggleAppBar,
-          child: Video(
-            controller: controller,
-            wakelock: true,
-            controls: MaterialVideoControls,
+            buttonBarButtonSize: 32.0,
+            buttonBarButtonColor: Colors.white,
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            extendBodyBehindAppBar: true,
+            body: isDesktop
+                ? MouseRegion(
+                    onHover: (event) {
+                      // Only show controls if mouse actually moved
+                      if (_lastMousePosition != event.position) {
+                        _lastMousePosition = event.position;
+                        _showControls();
+                      }
+                    },
+                    child: Video(
+                      controller: controller,
+                      wakelock: true,
+                      controls: MaterialVideoControls,
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: _showControls,
+                    child: Video(
+                      controller: controller,
+                      wakelock: true,
+                      controls: MaterialVideoControls,
+                    ),
+                  ),
           ),
         ),
       ),
