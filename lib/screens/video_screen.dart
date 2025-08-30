@@ -89,6 +89,114 @@ class _VideoScreenState extends State<VideoScreen> {
     super.dispose();
   }
 
+  void _showSubtitleSelector() async {
+    final tracks = player.state.tracks;
+    final currentSubtitle = player.state.track.subtitle;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 32, horizontal: 16.0),
+              child: ListView(
+                children: [
+                  if (tracks.subtitle.isNotEmpty) ...[
+                    const Text('Subtitles',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(
+                      height: 16.0,
+                    ),
+                    RadioGroup<SubtitleTrack>(
+                        onChanged: (val) async {
+                          await player.setSubtitleTrack(val!);
+                          setModalState(() => _selectedSubtitle = val);
+                          setState(() => _selectedSubtitle = val);
+                        },
+                        groupValue: _selectedSubtitle ?? currentSubtitle,
+                        child: ListTile(
+                          leading: Radio<SubtitleTrack>(
+                              toggleable: true, value: SubtitleTrack.no()),
+                          title: Text('None'),
+                        )),
+                    ...tracks.subtitle.map((track) {
+                      return RadioGroup<SubtitleTrack>(
+                          onChanged: (val) async {
+                            if (val != null) {
+                              await player.setSubtitleTrack(val);
+                              setModalState(() => _selectedSubtitle = val);
+                              setState(() => _selectedSubtitle = val);
+                            }
+                          },
+                          groupValue: _selectedSubtitle ?? currentSubtitle,
+                          child: ListTile(
+                            leading: Radio<SubtitleTrack>(
+                                toggleable: true, value: track),
+                            title: Text(track.title ?? 'Subtitle'),
+                            subtitle: track.language != null
+                                ? Text(track.language!)
+                                : null,
+                          ));
+                    }),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAudioSelector() async {
+    final tracks = player.state.tracks;
+    final currentAudio = player.state.track.audio;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 32, horizontal: 16.0),
+              child: ListView(
+                children: [
+                  if (tracks.audio.isNotEmpty) ...[
+                    const Text('Audio Tracks',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(
+                      height: 16.0,
+                    ),
+                    ...tracks.audio.map((track) {
+                      return RadioGroup<AudioTrack>(
+                          onChanged: (val) async {
+                            if (val != null) {
+                              await player.setAudioTrack(val);
+                              setModalState(() => _selectedAudio = val);
+                              setState(() => _selectedAudio = val);
+                            }
+                          },
+                          groupValue: _selectedAudio ?? currentAudio,
+                          child: ListTile(
+                            leading: Radio<AudioTrack>(
+                                toggleable: true, value: track),
+                            title: Text(track.title ?? 'Audio'),
+                            subtitle: track.language != null
+                                ? Text(track.language!)
+                                : null,
+                          ));
+                    }),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showTrackSelector() async {
     final tracks = player.state.tracks;
     final currentAudio = player.state.track.audio;
@@ -255,32 +363,82 @@ class _VideoScreenState extends State<VideoScreen> {
             buttonBarButtonSize: 24.0,
             buttonBarButtonColor: Colors.white,
             // Modify top button bar:
-
+            topButtonBarMargin: EdgeInsets.only(bottom: 56, left: 48, right: 48),
             topButtonBar: [
               IconButton(
                   color: Colors.white,
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Symbols.arrow_back)),
-              const Spacer(),
+              SizedBox(
+                width: 16,
+              ),
               Text(widget.title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   )),
-              const Spacer(),
-              MaterialDesktopCustomButton(
+              // MaterialDesktopCustomButton(
+              //   onPressed: () async {
+              //     _showTrackSelector();
+              //     // debugPrint('Custom "Settings" button pressed.');
+              //   },
+              //   icon: const Icon(Symbols.settings),
+              // ),
+            ],
+            shiftSubtitlesOnControlsVisibilityChange: isDesktop ?  true : false,
+            primaryButtonBar: [
+              IconButton(
                 onPressed: () async {
-                  _showTrackSelector();
-                  // debugPrint('Custom "Settings" button pressed.');
+                  final pos = player.state.position;
+                  player.seek(pos - const Duration(seconds: 10));
                 },
-                icon: const Icon(Symbols.settings),
+                icon:  Icon(Symbols.replay_10, size:  isDesktop ?32 : 24,),
+              ),
+              SizedBox(width: 32,),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
+                child: IconButton.filledTonal(
+                  key: ValueKey<bool>(player.state.playing),
+                  onPressed: () {
+                    setState(() {
+                      player.playOrPause();
+                    });
+                  },
+                  icon: StreamBuilder(
+                    stream: controller.player.stream.playing,
+                    builder: (context, playing) => Icon(
+                      playing.data == true ? Symbols.pause : Symbols.play_arrow,
+                      color: Colors.white,
+                      size: isDesktop ? 48 : 32,
+                    ),
+                  ),
+                  tooltip: player.state.playing ? 'Pause' : 'Play',
+                ),
+              ),
+              SizedBox(width: 32,),
+              IconButton(
+                onPressed: () async{
+                  final pos = player.state.position;
+                  player.seek(pos + const Duration(seconds: 10));
+                },
+                icon:  Icon(Symbols.forward_10, size: isDesktop ?32 : 24,),
               ),
             ],
+
             bottomButtonBarMargin:
-                EdgeInsets.only(bottom: 48, left: 48, right: 48),
+                EdgeInsets.only(bottom: 56, left: 48, right: 48),
             bottomButtonBar: [
               MaterialPositionIndicator(),
+              Spacer(),
+              IconButton(
+                  onPressed: () => _showSubtitleSelector(),
+                  icon: Icon(Symbols.closed_caption_rounded)),
+              IconButton(
+                  onPressed: () => _showAudioSelector(),
+                  icon: Icon(Symbols.audiotrack)),
             ],
             seekBarColor: Colors.white12,
             seekBarPositionColor: Theme.of(context).colorScheme.primaryFixed,
@@ -312,6 +470,9 @@ class _VideoScreenState extends State<VideoScreen> {
                     child: Video(
                       controller: controller,
                       wakelock: true,
+                      subtitleViewConfiguration: SubtitleViewConfiguration(
+                        textScaler: TextScaler.linear( isDesktop ? 1 : 0.6),
+                      ),
                       controls: MaterialVideoControls,
                     ),
                   )
@@ -320,6 +481,10 @@ class _VideoScreenState extends State<VideoScreen> {
                     child: Video(
                       controller: controller,
                       wakelock: true,
+                      subtitleViewConfiguration: SubtitleViewConfiguration(
+                        textScaler: TextScaler.linear( isDesktop ? 1 : 0.6),
+                      ),
+                      filterQuality: FilterQuality.high,
                       controls: MaterialVideoControls,
                     ),
                   ),
