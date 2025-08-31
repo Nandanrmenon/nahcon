@@ -3,8 +3,15 @@
 
 A Jellyfin video client made using Flutter.
 
-[Download](https://github.com/Nandanrmenon/nahcon/releases)
+## Downloads
 
+Now available on
+
+<a href='https://play.google.com/store/apps/details?id=nl.jknaapen.fladder&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=250/></a>
+
+*or*
+
+[Github Release](https://github.com/Nandanrmenon/nahcon/releases)
 ## Features
 - [x] Login into your Jellyfin server
 - [x] Display Library
