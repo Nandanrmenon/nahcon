@@ -12,14 +12,14 @@ class VideoScreen extends StatefulWidget {
   final String videoUrl;
   final String title;
   final JellyfinService service;
-    final String itemId;
+  final String itemId;
 
   const VideoScreen({
     super.key,
     required this.videoUrl,
     required this.title,
     required this.service,
-        required this.itemId,
+    required this.itemId,
   });
 
   @override
@@ -92,7 +92,8 @@ class _VideoScreenState extends State<VideoScreen> {
 
   Future<void> _loadAndSeekToProgress() async {
     // Fetch saved progress from Jellyfin
-        final saved = await widget.service.getPlaybackPosition(widget.itemId);
+    final saved = await widget.service.getPlaybackPosition(widget.itemId);
+    print(saved);
     if (saved != null && saved > Duration(seconds: 5)) {
       _initialPosition = saved;
       // Wait for player to be ready
@@ -408,7 +409,13 @@ class _VideoScreenState extends State<VideoScreen> {
             topButtonBar: [
               IconButton(
                   color: Colors.white,
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    setState(() {
+                      player.playOrPause();
+                    });
+                    _saveProgress(isPaused: !player.state.playing);
+                    Navigator.pop(context);
+                  },
                   icon: const Icon(Symbols.arrow_back)),
               SizedBox(
                 width: 16,
@@ -419,13 +426,6 @@ class _VideoScreenState extends State<VideoScreen> {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   )),
-              // MaterialDesktopCustomButton(
-              //   onPressed: () async {
-              //     _showTrackSelector();
-              //     // debugPrint('Custom "Settings" button pressed.');
-              //   },
-              //   icon: const Icon(Symbols.settings),
-              // ),
             ],
             shiftSubtitlesOnControlsVisibilityChange: isDesktop ? true : false,
             primaryButtonBar: [
@@ -452,9 +452,7 @@ class _VideoScreenState extends State<VideoScreen> {
                     setState(() {
                       player.playOrPause();
                     });
-                                        _saveProgress(isPaused: !player.state.playing);
-                    // _saveProgress(
-                    //     isPaused: player.state.playing ? false : true);
+                    _saveProgress(isPaused: !player.state.playing);
                   },
                   icon: StreamBuilder(
                     stream: controller.player.stream.playing,
