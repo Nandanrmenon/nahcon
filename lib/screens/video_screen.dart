@@ -12,12 +12,14 @@ class VideoScreen extends StatefulWidget {
   final String videoUrl;
   final String title;
   final JellyfinService service;
+    final String itemId;
 
   const VideoScreen({
     super.key,
     required this.videoUrl,
     required this.title,
     required this.service,
+        required this.itemId,
   });
 
   @override
@@ -37,6 +39,10 @@ class _VideoScreenState extends State<VideoScreen> {
 
   // Add this to track last mouse position for desktop
   Offset? _lastMousePosition;
+
+  Duration? _initialPosition;
+  bool _progressLoaded = false;
+  Timer? _progressSaveTimer;
 
   void _toggleAppBar() {
     setState(() {
@@ -70,6 +76,7 @@ class _VideoScreenState extends State<VideoScreen> {
         httpHeaders: widget.service.getVideoHeaders(),
       ),
     );
+    _loadAndSeekToProgress();
     _resetHideTimer();
     player.stream.tracks.listen((tracks) {
       setState(() {
@@ -78,11 +85,43 @@ class _VideoScreenState extends State<VideoScreen> {
         _selectedSubtitle = player.state.track.subtitle;
       });
     });
+    // Periodically save progress every 10 seconds
+    _progressSaveTimer =
+        Timer.periodic(const Duration(seconds: 10), (_) => _saveProgress());
+  }
+
+  Future<void> _loadAndSeekToProgress() async {
+    // Fetch saved progress from Jellyfin
+        final saved = await widget.service.getPlaybackPosition(widget.itemId);
+    if (saved != null && saved > Duration(seconds: 5)) {
+      _initialPosition = saved;
+      // Wait for player to be ready
+      await player.stream.position.first;
+      await player.seek(saved);
+    }
+    _progressLoaded = true;
+  }
+
+  Future<void> _saveProgress({bool isPaused = false}) async {
+    if (!_progressLoaded) return;
+    final pos = player.state.position;
+    final dur = player.state.duration;
+    // Only save if duration is valid
+    if (dur > Duration.zero) {
+      await widget.service.savePlaybackPosition(
+        itemId: widget.itemId,
+        position: pos,
+        duration: dur,
+        isPaused: isPaused,
+      );
+    }
   }
 
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _progressSaveTimer?.cancel();
+    _saveProgress(isPaused: true); // Save on exit/pause
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     player.dispose();
@@ -336,6 +375,7 @@ class _VideoScreenState extends State<VideoScreen> {
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.space): () {
           player.playOrPause();
+          _saveProgress(isPaused: !player.state.playing);
         },
         const SingleActivator(LogicalKeyboardKey.arrowRight): () async {
           final pos = player.state.position;
@@ -363,7 +403,8 @@ class _VideoScreenState extends State<VideoScreen> {
             buttonBarButtonSize: 24.0,
             buttonBarButtonColor: Colors.white,
             // Modify top button bar:
-            topButtonBarMargin: EdgeInsets.only(bottom: 56, left: 48, right: 48),
+            topButtonBarMargin:
+                EdgeInsets.only(bottom: 56, left: 48, right: 48),
             topButtonBar: [
               IconButton(
                   color: Colors.white,
@@ -386,16 +427,21 @@ class _VideoScreenState extends State<VideoScreen> {
               //   icon: const Icon(Symbols.settings),
               // ),
             ],
-            shiftSubtitlesOnControlsVisibilityChange: isDesktop ?  true : false,
+            shiftSubtitlesOnControlsVisibilityChange: isDesktop ? true : false,
             primaryButtonBar: [
               IconButton(
                 onPressed: () async {
                   final pos = player.state.position;
                   player.seek(pos - const Duration(seconds: 10));
                 },
-                icon:  Icon(Symbols.replay_10, size:  isDesktop ?32 : 24,),
+                icon: Icon(
+                  Symbols.replay_10,
+                  size: isDesktop ? 32 : 24,
+                ),
               ),
-              SizedBox(width: 32,),
+              SizedBox(
+                width: 32,
+              ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, animation) =>
@@ -406,6 +452,9 @@ class _VideoScreenState extends State<VideoScreen> {
                     setState(() {
                       player.playOrPause();
                     });
+                                        _saveProgress(isPaused: !player.state.playing);
+                    // _saveProgress(
+                    //     isPaused: player.state.playing ? false : true);
                   },
                   icon: StreamBuilder(
                     stream: controller.player.stream.playing,
@@ -418,13 +467,18 @@ class _VideoScreenState extends State<VideoScreen> {
                   tooltip: player.state.playing ? 'Pause' : 'Play',
                 ),
               ),
-              SizedBox(width: 32,),
+              SizedBox(
+                width: 32,
+              ),
               IconButton(
-                onPressed: () async{
+                onPressed: () async {
                   final pos = player.state.position;
                   player.seek(pos + const Duration(seconds: 10));
                 },
-                icon:  Icon(Symbols.forward_10, size: isDesktop ?32 : 24,),
+                icon: Icon(
+                  Symbols.forward_10,
+                  size: isDesktop ? 32 : 24,
+                ),
               ),
             ],
 
@@ -471,9 +525,11 @@ class _VideoScreenState extends State<VideoScreen> {
                       controller: controller,
                       wakelock: true,
                       subtitleViewConfiguration: SubtitleViewConfiguration(
-                        textScaler: TextScaler.linear( isDesktop ? 1 : 0.6),
+                        textScaler: TextScaler.linear(isDesktop ? 1 : 0.6),
                       ),
                       controls: MaterialVideoControls,
+                      // onPause: () => _saveProgress(isPaused: true),
+                      // onPlay: () => _saveProgress(isPaused: false),
                     ),
                   )
                 : GestureDetector(
@@ -482,10 +538,12 @@ class _VideoScreenState extends State<VideoScreen> {
                       controller: controller,
                       wakelock: true,
                       subtitleViewConfiguration: SubtitleViewConfiguration(
-                        textScaler: TextScaler.linear( isDesktop ? 1 : 0.6),
+                        textScaler: TextScaler.linear(isDesktop ? 1 : 0.6),
                       ),
                       filterQuality: FilterQuality.high,
                       controls: MaterialVideoControls,
+                      // onPause: () => _saveProgress(isPaused: true),
+                      // onPlay: () => _saveProgress(isPaused: false),
                     ),
                   ),
           ),

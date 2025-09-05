@@ -157,7 +157,8 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               children: [
                                 Text(
                                   widget.series.name,
-                                  style: Theme.of(context).textTheme.headlineSmall,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 Text(
                                   widget.series.year.toString(),
@@ -165,9 +166,9 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                       .textTheme
                                       .labelLarge
                                       ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
                                 ),
                               ],
                             ),
@@ -289,6 +290,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     VideoScreen(
+                                                  itemId: widget.series.id,
                                                   videoUrl: widget.service
                                                       .getStreamUrl(episode.id),
                                                   title: episode.name,
@@ -471,6 +473,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => VideoScreen(
+                                                itemId: widget.series.id,
                                                 videoUrl: widget.service
                                                     .getStreamUrl(
                                                         widget.series.id),

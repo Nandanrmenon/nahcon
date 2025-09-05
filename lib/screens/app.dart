@@ -175,7 +175,11 @@ class _AppState extends State<App> {
                 ),
               ],
             ),
-            body: content,
+            body: Center(
+                child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: content,
+            )),
           );
   }
 

@@ -402,6 +402,24 @@ class JellyfinService {
     throw Exception('Failed to load next up items');
   }
 
+  Future<List<JellyfinItem>> getContinuePlaying() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/Users/$userId/Items/Resume'),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return (data['Items'] as List)
+          .map((item) => JellyfinItem.fromJson(item))
+          .toList();
+    }
+    throw Exception('Failed to load next up items');
+  }
+
   Future<List<JellyfinItem>> getSimilarItems(String itemId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/Items/$itemId/Similar?userId=$userId&Limit=10'),
@@ -580,5 +598,52 @@ class JellyfinService {
     } catch (e) {
       return false;
     }
+  }
+
+  /// Fetch the saved playback position (in milliseconds) for a media item.
+  Future<Duration?> getPlaybackPosition(String itemId) async {
+    if (userId == null || accessToken == null || baseUrl == null) return null;
+    final response = await http.get(
+      Uri.parse('$baseUrl/Users/$userId/Items/$itemId/PlaybackInfo'),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Try to get from UserData.PlaybackPositionTicks
+      final userData = data['UserData'];
+      if (userData != null && userData['PlaybackPositionTicks'] != null) {
+        final ticks = userData['PlaybackPositionTicks'] as int;
+        return Duration(milliseconds: (ticks / 10000).round());
+      }
+    }
+    return null;
+  }
+
+  /// Save the playback position (in milliseconds) for a media item.
+  Future<void> savePlaybackPosition({
+    required String itemId,
+    required Duration position,
+    required Duration? duration,
+    bool isPaused = false,
+  }) async {
+    if (userId == null || accessToken == null || baseUrl == null) return;
+    final url = '$baseUrl/Users/$userId/PlayingItems/$itemId/Progress';
+    final body = {
+      'PositionTicks': position.inMilliseconds * 10000,
+      if (duration != null) 'DurationTicks': duration.inMilliseconds * 10000,
+      'IsPaused': isPaused,
+    };
+    await http.post(
+      Uri.parse(url),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
   }
 }

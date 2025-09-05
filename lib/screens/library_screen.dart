@@ -23,6 +23,99 @@ class LibraryScreen extends StatelessWidget {
           : AppBar(title: const Text('Jellyfin')),
       body: CustomScrollView(
         slivers: [
+          FutureBuilder<List<JellyfinItem>>(
+            future: service.getContinuePlaying(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                final items = snapshot.data!;
+                return SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 250,
+                    child: CarouselView(
+                      itemExtent: 350,
+                      shrinkExtent: 0.8,
+                      itemSnapping: true,
+                      enableSplash: false,
+                      children: items.map((item) {
+                        return Material(
+                          borderRadius: BorderRadius.circular(8.0),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MovieDetailsScreen(
+                                    movie: item,
+                                    service: service,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.imageUrl != null)
+                                  Expanded(
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        Image.network(
+                                          service.getImageUrl(item.imageUrl),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        Positioned(
+                                          bottom: 5,
+                                          left: 10,
+                                          right: 10,
+                                          child: LinearProgressIndicator(
+                                            value: item.playbackProgress,
+                                            // backgroundColor: Colors.black26,
+                                            // color: Colors.redAccent,
+                                            // minHeight: 4,
+                                          ),
+                                        ),
+                                        const Positioned(
+                                          bottom: 8,
+                                          right: 8,
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.black54,
+                                            child: Icon(
+                                              Symbols.play_arrow_rounded,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  const Expanded(
+                                    child: Center(
+                                        child: Icon(Symbols.movie, size: 48)),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    item.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                );
+              }
+              return const SliverToBoxAdapter(child: SizedBox());
+            },
+          ),
+
           // Continue Playing Section
           SliverToBoxAdapter(
             child: ListTile(

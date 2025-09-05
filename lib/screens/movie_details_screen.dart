@@ -407,6 +407,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           VideoScreen(
+                                                        itemId: widget.movie.id,
                                                         videoUrl: widget.service
                                                             .getStreamUrl(widget
                                                                 .movie.id),
@@ -453,6 +454,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => VideoScreen(
+                                      itemId: widget.movie.id,
                                       videoUrl: widget.service
                                           .getStreamUrl(widget.movie.id),
                                       title: widget.movie.name,

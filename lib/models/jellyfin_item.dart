@@ -5,10 +5,14 @@ class JellyfinItem {
   final String? imageUrl;
   final String? overview;
   final double? rating;
-  final int? runtime;
+  final int? runtime; // minutes
   final String? officialRating;
   final List<String>? genres;
   final int? year;
+
+  // NEW fields
+  final int? runTimeTicks;
+  final int? playbackPositionTicks;
 
   JellyfinItem({
     required this.id,
@@ -21,6 +25,8 @@ class JellyfinItem {
     this.officialRating,
     this.genres,
     this.year,
+    this.runTimeTicks,
+    this.playbackPositionTicks,
   });
 
   factory JellyfinItem.fromJson(Map<String, dynamic> json) {
@@ -47,6 +53,14 @@ class JellyfinItem {
       officialRating: json['OfficialRating'],
       genres: json['Genres'] != null ? List<String>.from(json['Genres']) : null,
       year: json['ProductionYear'],
+      runTimeTicks: runTimeTicks,
+      playbackPositionTicks: json['UserData']?['PlaybackPositionTicks'],
     );
+  }
+
+  /// Computed value for UI progress bar
+  double get playbackProgress {
+    if (runTimeTicks == null || runTimeTicks == 0) return 0;
+    return (playbackPositionTicks ?? 0) / runTimeTicks!;
   }
 }
