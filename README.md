@@ -7,7 +7,7 @@ A Jellyfin video client made using Flutter.
 
 Now available on
 
-<a href='https://play.google.com/store/apps/details?id=nl.jknaapen.fladder&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=250/></a>
+<a href='https://play.google.com/store/apps/details?id=com.nahnah.nahcon'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=250/></a>
 
 *or*
 
@@ -16,11 +16,11 @@ Now available on
 - [x] Login into your Jellyfin server
 - [x] Display Library
 - [x] Filter Media
-- [ ] Search Media
+- [x] Search Media
 - [x] Stream Media (requires a lot of testing)
 - [x] Change Video/Audio/Subtitle track (buggy but works)
 - [ ] Download media onto the device
-- [ ] Continue watching (works but needs testing)
+- [x] Continue watching
 - [ ] Add to watch later
 - [x] Show TV shows
 - [x] Multi user account

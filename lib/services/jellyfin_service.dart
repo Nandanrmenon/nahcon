@@ -7,7 +7,9 @@ import '../models/jellyfin_item.dart';
 
 class JellyfinService {
   static final JellyfinService _instance = JellyfinService._internal();
+
   factory JellyfinService() => _instance;
+
   JellyfinService._internal();
 
   String? baseUrl;
@@ -215,9 +217,30 @@ class JellyfinService {
     throw Exception('Failed to load suggestions');
   }
 
+  Future<List<JellyfinItem>> getHistory({int limit = 20}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/Users/$userId/Items').replace(queryParameters: {
+        'Limit': '$limit',
+        'Filters': 'IsPlayed',
+        'IncludeItemTypes': 'Movie,Series',
+        'Recursive': 'true',
+        'SortBy': 'DatePlayed',
+        'SortOrder': 'Descending',
+      }),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+      },
+    );
 
-
-
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return (data['Items'] as List)
+          .map((item) => JellyfinItem.fromJson(item))
+          .toList();
+    }
+    throw Exception('Failed to load history');
+  }
 
   Future<List<String>> getMovieGenres() async {
     final response = await http.get(
@@ -628,7 +651,6 @@ class JellyfinService {
     return null;
   }
 
-
   Future<void> savePlaybackPosition({
     required String itemId,
     required Duration position,
@@ -656,5 +678,4 @@ class JellyfinService {
       body: jsonEncode(body),
     );
   }
-
 }
