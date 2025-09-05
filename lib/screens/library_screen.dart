@@ -23,6 +23,16 @@ class LibraryScreen extends StatelessWidget {
           : AppBar(title: const Text('Jellyfin')),
       body: CustomScrollView(
         slivers: [
+          // Continue Playing Section
+          SliverToBoxAdapter(
+            child: ListTile(
+              leading: const Icon(Symbols.resume_rounded),
+              title: Text(
+                'Continue Playing',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+          ),
           FutureBuilder<List<JellyfinItem>>(
             future: service.getContinuePlaying(),
             builder: (context, snapshot) {
@@ -115,11 +125,10 @@ class LibraryScreen extends StatelessWidget {
               return const SliverToBoxAdapter(child: SizedBox());
             },
           ),
-
-          // Continue Playing Section
+          // Next Up Section
           SliverToBoxAdapter(
             child: ListTile(
-              leading: const Icon(Symbols.resume_rounded),
+              leading: const Icon(Symbols.skip_next),
               title: Text(
                 'Next Up',
                 style: Theme.of(context).textTheme.labelLarge,
@@ -212,13 +221,13 @@ class LibraryScreen extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Symbols.shuffle_rounded),
               title: Text(
-                'Random',
+                'Suggestions',
                 style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
           ),
           FutureBuilder<List<JellyfinItem>>(
-            future: service.getRandomMovies(),
+            future: service.getSuggestions(),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 final items = snapshot.data!;

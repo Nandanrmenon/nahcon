@@ -194,12 +194,15 @@ class JellyfinService {
     throw Exception('Failed to load libraries');
   }
 
-  Future<List<JellyfinItem>> getRandomMovies({int limit = 5}) async {
+  Future<List<JellyfinItem>> getSuggestions({int limit = 10}) async {
     final response = await http.get(
-      Uri.parse(
-          '$baseUrl/Items?IncludeItemTypes=Movie&Recursive=true&Limit=$limit&SortBy=Random'),
+      Uri.parse('$baseUrl/Users/$userId/Suggestions').replace(queryParameters: {
+        'limit': '$limit',
+        'type': 'Movie,Series',
+      }),
       headers: {
-        'Authorization': 'MediaBrowser Token="$accessToken"',
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
       },
     );
 
@@ -209,8 +212,12 @@ class JellyfinService {
           .map((item) => JellyfinItem.fromJson(item))
           .toList();
     }
-    throw Exception('Failed to load random movies');
+    throw Exception('Failed to load suggestions');
   }
+
+
+
+
 
   Future<List<String>> getMovieGenres() async {
     final response = await http.get(

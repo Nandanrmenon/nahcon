@@ -53,7 +53,7 @@ class _TopNavState extends State<TopNav> {
         viewHintText: 'Search for Movies or TV Show',
         suggestionsBuilder: (context, controller) async {
           if (controller.text.isEmpty) {
-            final randomItems = await widget.service.getRandomMovies(limit: 5);
+            final randomItems = await widget.service.getSuggestions(limit: 5);
             return [
               const ListTile(
                 title: Text('Suggestions for you'),
