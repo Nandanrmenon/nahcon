@@ -6,15 +6,21 @@ import 'package:nahcon/widgets/movie_card.dart';
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends StatefulWidget {
   final JellyfinService service;
 
   const LibraryScreen({super.key, required this.service});
 
   @override
+  State<LibraryScreen> createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends State<LibraryScreen> {
+  @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: isDesktop
           ? PreferredSize(
               preferredSize: Size.zero,
@@ -39,7 +45,7 @@ class LibraryScreen extends StatelessWidget {
             ),
 
             FutureBuilder<List<JellyfinItem>>(
-              future: service.getContinuePlaying(),
+              future: widget.service.getContinuePlaying(),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   final items = snapshot.data!;
@@ -57,14 +63,29 @@ class LibraryScreen extends StatelessWidget {
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
                               onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailsScreen(
-                                      movie: item,
-                                      service: service,
+                                if (isDesktop) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    scrollControlDisabledMaxHeightRatio: 0.9,
+                                    constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                    clipBehavior: Clip.antiAlias,
+                                    builder: (context) => Center(
+                                      child: MovieDetailsScreen(
+                                        movie: item,
+                                        service: widget.service,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                } else {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => MovieDetailsScreen(
+                                        movie: item,
+                                        service: widget.service,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +96,8 @@ class LibraryScreen extends StatelessWidget {
                                         fit: StackFit.expand,
                                         children: [
                                           Image.network(
-                                            service.getImageUrl(item.imageUrl),
+                                            widget.service
+                                                .getImageUrl(item.imageUrl),
                                             fit: BoxFit.cover,
                                           ),
                                           Positioned(
@@ -117,19 +139,24 @@ class LibraryScreen extends StatelessWidget {
                                             left: 20,
                                             right: 20,
                                             child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Text(
                                                     item.name,
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodyMedium!
                                                         .copyWith(
-                                                        color: Colors.white),
+                                                            color:
+                                                                Colors.white),
                                                   ),
                                                 ),
                                               ],
@@ -144,7 +171,6 @@ class LibraryScreen extends StatelessWidget {
                                               minHeight: 4,
                                             ),
                                           ),
-
                                         ],
                                       ),
                                     )
@@ -175,7 +201,7 @@ class LibraryScreen extends StatelessWidget {
               ),
             ),
             FutureBuilder<List<JellyfinItem>>(
-              future: service.getNextUp(),
+              future: widget.service.getNextUp(),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   final items = snapshot.data!;
@@ -193,14 +219,29 @@ class LibraryScreen extends StatelessWidget {
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
                               onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailsScreen(
-                                      movie: item,
-                                      service: service,
+                                if (isDesktop) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    scrollControlDisabledMaxHeightRatio: 0.9,
+                                    constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                    clipBehavior: Clip.antiAlias,
+                                    builder: (context) => Center(
+                                      child: MovieDetailsScreen(
+                                        movie: item,
+                                        service: widget.service,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                } else {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => MovieDetailsScreen(
+                                        movie: item,
+                                        service: widget.service,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +252,8 @@ class LibraryScreen extends StatelessWidget {
                                         fit: StackFit.expand,
                                         children: [
                                           Image.network(
-                                            service.getImageUrl(item.imageUrl),
+                                            widget.service
+                                                .getImageUrl(item.imageUrl),
                                             fit: BoxFit.cover,
                                           ),
                                           Positioned(
@@ -253,19 +295,24 @@ class LibraryScreen extends StatelessWidget {
                                             left: 20,
                                             right: 20,
                                             child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Text(
                                                     item.name,
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodyMedium!
                                                         .copyWith(
-                                                        color: Colors.white),
+                                                            color:
+                                                                Colors.white),
                                                   ),
                                                 ),
                                               ],
@@ -300,7 +347,7 @@ class LibraryScreen extends StatelessWidget {
               ),
             ),
             FutureBuilder<List<JellyfinItem>>(
-              future: service.getSuggestions(),
+              future: widget.service.getSuggestions(),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   final items = snapshot.data!;
@@ -318,18 +365,33 @@ class LibraryScreen extends StatelessWidget {
                           return MovieCard(
                             title: item.name,
                             posterUrl: item.imageUrl != null
-                                ? service.getImageUrl(item.imageUrl)
+                                ? widget.service.getImageUrl(item.imageUrl)
                                 : null,
                             rating: item.rating,
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => MovieDetailsScreen(
-                                    movie: item,
-                                    service: service,
+                              if (isDesktop) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  scrollControlDisabledMaxHeightRatio: 0.9,
+                                  constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                  clipBehavior: Clip.antiAlias,
+                                  builder: (context) => Center(
+                                    child: MovieDetailsScreen(
+                                      movie: item,
+                                      service: widget.service,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              } else {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MovieDetailsScreen(
+                                      movie: item,
+                                      service: widget.service,
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                           );
                         }).toList(),

@@ -14,7 +14,6 @@ class SeriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Series')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return FutureBuilder<List<JellyfinItem>>(
@@ -38,6 +37,7 @@ class SeriesScreen extends StatelessWidget {
                 ),
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
+                  final isDesktop = ResponsiveGrid.isDesktop(constraints);
                   final series = snapshot.data![index];
                   return MovieCard(
                     title: series.name,
@@ -45,15 +45,30 @@ class SeriesScreen extends StatelessWidget {
                         ? service.getImageUrl(series.imageUrl)
                         : null,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SeriesDetailsScreen(
-                            series: series,
-                            service: service,
+                      if (isDesktop) {
+                        showModalBottomSheet(
+                          context: context,
+                          scrollControlDisabledMaxHeightRatio: 0.9,
+                          constraints:
+                              BoxConstraints(minWidth: 300, maxWidth: 1200),
+                          clipBehavior: Clip.antiAlias,
+                          builder: (context) => Center(
+                            child: SeriesDetailsScreen(
+                              series: series,
+                              service: service,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SeriesDetailsScreen(
+                              series: series,
+                              service: service,
+                            ),
+                          ),
+                        );
+                      }
                     },
                   );
                 },

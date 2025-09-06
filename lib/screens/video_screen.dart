@@ -414,6 +414,9 @@ class _VideoScreenState extends State<VideoScreen> {
                       player.playOrPause();
                     });
                     _saveProgress(isPaused: !player.state.playing);
+                    setState(() {
+
+                    });
                     Navigator.pop(context);
                   },
                   icon: const Icon(Symbols.arrow_back)),

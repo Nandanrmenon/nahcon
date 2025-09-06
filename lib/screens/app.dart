@@ -142,7 +142,7 @@ class _AppState extends State<App> {
                   label: 'Home',
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 0; // Switch to Settings
+                      _selectedIndex = 0;
                     });
                   },
                 ),

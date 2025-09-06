@@ -162,15 +162,29 @@ class _MoviesScreenState extends State<MoviesScreen> {
                           return MovieCard(
                             title: movie.name,
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MovieDetailsScreen(
-                                    movie: movie,
-                                    service: widget.service,
+                              if (isDesktop) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  scrollControlDisabledMaxHeightRatio: 0.9,
+                                  constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                  clipBehavior: Clip.antiAlias,
+                                  builder: (context) => Center(
+                                    child: MovieDetailsScreen(
+                                      movie: movie,
+                                      service: widget.service,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              } else {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MovieDetailsScreen(
+                                      movie: movie,
+                                      service: widget.service,
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                             rating: movie.rating,
                             posterUrl: movie.imageUrl != null

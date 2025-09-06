@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -102,31 +104,179 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
             );
           }
 
-          final content = Stack(
-            children: [
-              // Backdrop and Content
-              CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    expandedHeight: 500,
-                    pinned: true,
-                    leading: isDesktop ? Container() : BackButton(),
-                    backgroundColor: Colors.black38,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Hero(
-                        tag: 'movie-poster-mobile-${widget.movie.id}',
-                        // Changed tag for mobile
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (widget.movie.imageUrl != null && !isDesktop)
-                              Image.network(
-                                widget.service
-                                    .getImageUrl(widget.movie.imageUrl),
-                                fit: BoxFit.cover,
+          final content = Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              spacing: 16,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!isDesktop)
+                  Hero(
+                    tag: 'movie-title-${widget.movie.id}',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.movie.name,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          if (movieDetails.year != null)
+                            Text(
+                              widget.movie.year.toString(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant),
+                            ),
+                          // Text(widget.movie.)
+                        ],
+                      ),
+                    ),
+                  ),
+                // Metadata row
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 8,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8.0,
+                      children: [
+                        if (movieDetails.officialRating != null)
+                          Chip(
+                            avatar: Icon(
+                              Symbols.family_restroom_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: Text(movieDetails.officialRating!),
+                          ),
+                        if (widget.movie.rating != null)
+                          Chip(
+                            avatar: const Icon(Symbols.star_rounded,
+                                color: Colors.amber, size: 18),
+                            label:
+                                Text(widget.movie.rating!.toStringAsFixed(1)),
+                          ),
+                        if (movieDetails.runtime != null)
+                          Chip(
+                            avatar: Icon(
+                              Symbols.timer_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: Text('${movieDetails.runtime} min'),
+                          ),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: movieDetails.genres
+                              ?.map((genre) => Chip(
+                                    label: Text(genre),
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainer,
+                                  ))
+                              .toList() ??
+                          [],
+                    ),
+                  ],
+                ),
+                Text(
+                  movieDetails.overview ?? 'No Description',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  'More Like This',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                SizedBox(
+                  height: 250,
+                  child: FutureBuilder<List<JellyfinItem>>(
+                    future: widget.service.getSimilarItems(widget.movie.id),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox.shrink();
+                      }
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          final movie = snapshot.data![index];
+                          return Container(
+                            width: 120,
+                            margin: const EdgeInsets.only(right: 8),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MovieDetailsScreen(
+                                      movie: movie,
+                                      service: widget.service,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (movie.imageUrl != null)
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget.service
+                                              .getImageUrl(movie.imageUrl),
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: 250,
+                                        ),
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      movie.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            if (isDesktop)
-                              FutureBuilder<List<String>>(
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 80), // Space for FAB
+              ],
+            ),
+          );
+
+          return isDesktop
+              ? Scaffold(
+                  appBar: AppBar(),
+                  body: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 21 / 9,
+                              child: FutureBuilder<List<String>>(
                                 future: widget.service
                                     .getBackdropUrls(widget.movie.id),
                                 builder: (context, snapshot) {
@@ -134,10 +284,17 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                       snapshot.data!.isEmpty) {
                                     // fallback to poster if no backdrops
                                     return widget.movie.imageUrl != null
-                                        ? Image.network(
-                                            widget.service.getImageUrl(
-                                                widget.movie.imageUrl),
-                                            fit: BoxFit.cover,
+                                        ? ClipRect(
+                                            child: ImageFiltered(
+                                              imageFilter: ImageFilter.blur(
+                                                tileMode: TileMode.mirror,
+                                                  sigmaY: 5, sigmaX: 5),
+                                              child: Image.network(
+                                                widget.service.getImageUrl(
+                                                    widget.movie.imageUrl),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
                                           )
                                         : const SizedBox.shrink();
                                   }
@@ -146,298 +303,137 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                   );
                                 },
                               ),
-                            // Top gradient for better app bar visibility
-                            const DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.center,
-                                  colors: [
-                                    Colors.black54,
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
                             ),
-                            // Bottom gradient for content visibility
-                            const DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black87,
-                                  ],
-                                  stops: [0.6, 1.0],
-                                ),
+                            Positioned(
+                              bottom: -80,
+                              left: 20,
+                              child: SizedBox(
+                                  width: 300,
+                                  child: Center(
+                                      child: Material(
+                                    elevation: 8.0,
+                                    child: AspectRatio(
+                                        aspectRatio: 9 / 16, child: poster),
+                                  ))),
+                            ),
+                            Positioned(
+                              bottom: -100,
+                              right: 20,
+                              child: Column(
+                                spacing: 16.0,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Hero(
+                                    tag: 'movie-title-${widget.movie.id}',
+                                    child: Material(
+                                      type: MaterialType.transparency,
+                                      child: Text(
+                                        widget.movie.name,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    child: FilledButton.icon(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => VideoScreen(
+                                              itemId: widget.movie.id,
+                                              videoUrl: widget.service
+                                                  .getStreamUrl(
+                                                      widget.movie.id),
+                                              title: widget.movie.name,
+                                              service: widget.service,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Symbols.play_arrow),
+                                      label: const Text('Play'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        spacing: 16,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (!isDesktop)
-                            Hero(
-                              tag: 'movie-title-${widget.movie.id}',
-                              child: Material(
-                                type: MaterialType.transparency,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.movie.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ),
-                                    if (movieDetails.year != null)
-                                      Text(
-                                        widget.movie.year.toString(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge
-                                            ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant),
-                                      ),
-                                    // Text(widget.movie.)
-                                  ],
-                                ),
-                              ),
-                            ),
-                          // Metadata row
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 8,
-                            children: [
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8.0,
-                                children: [
-                                  if (movieDetails.officialRating != null)
-                                    Chip(
-                                      avatar: Icon(
-                                        Symbols.family_restroom_rounded,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        size: 18,
-                                      ),
-                                      label: Text(movieDetails.officialRating!),
-                                    ),
-                                  if (widget.movie.rating != null)
-                                    Chip(
-                                      avatar: const Icon(Symbols.star_rounded,
-                                          color: Colors.amber, size: 18),
-                                      label: Text(widget.movie.rating!
-                                          .toStringAsFixed(1)),
-                                    ),
-                                  if (movieDetails.runtime != null)
-                                    Chip(
-                                      avatar: Icon(
-                                        Symbols.timer_rounded,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        size: 18,
-                                      ),
-                                      label:
-                                          Text('${movieDetails.runtime} min'),
-                                    ),
-                                ],
-                              ),
-                              Wrap(
-                                spacing: 8,
-                                children: movieDetails.genres
-                                        ?.map((genre) => Chip(
-                                              label: Text(genre),
-                                              backgroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainer,
-                                            ))
-                                        .toList() ??
-                                    [],
-                              ),
-                            ],
-                          ),
-                          Text(
-                            movieDetails.overview ?? 'No Description',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          Text(
-                            'More Like This',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          SizedBox(
-                            height: 250,
-                            child: FutureBuilder<List<JellyfinItem>>(
-                              future: widget.service
-                                  .getSimilarItems(widget.movie.id),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) {
-                                  return const SizedBox.shrink();
-                                }
-                                return ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (context, index) {
-                                    final movie = snapshot.data![index];
-                                    return Container(
-                                      width: 120,
-                                      margin: const EdgeInsets.only(right: 8),
-                                      child: InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MovieDetailsScreen(
-                                                movie: movie,
-                                                service: widget.service,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            if (movie.imageUrl != null)
-                                              Expanded(
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    widget.service.getImageUrl(
-                                                        movie.imageUrl),
-                                                    fit: BoxFit.cover,
-                                                    width: double.infinity,
-                                                    height: 250,
-                                                  ),
-                                                ),
-                                              ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                movie.name,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 80), // Space for FAB
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-
-          return isDesktop
-              ? Scaffold(
-                  body: Row(
-                    children: [
-                      SingleChildScrollView(
-                        child: Material(
-                          child: SizedBox(
-                              width: 400,
-                              child: Column(
-                                children: [
-                                  AppBar(),
-                                  Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0, vertical: 8.0),
-                                        child: Material(child: poster),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0, vertical: 8.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          spacing: 16.0,
-                                          children: [
-                                            Expanded(
-                                              child: Hero(
-                                                tag:
-                                                    'movie-title-${widget.movie.id}',
-                                                child: Material(
-                                                  type:
-                                                      MaterialType.transparency,
-                                                  child: Text(
-                                                    widget.movie.name,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .headlineSmall,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: FilledButton.icon(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          VideoScreen(
-                                                        itemId: widget.movie.id,
-                                                        videoUrl: widget.service
-                                                            .getStreamUrl(widget
-                                                                .movie.id),
-                                                        title:
-                                                            widget.movie.name,
-                                                        service: widget.service,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                icon: const Icon(
-                                                    Symbols.play_arrow),
-                                                label: const Text('Play'),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
+                        SizedBox(
+                          height: 80,
                         ),
-                      ),
-                      Expanded(child: content),
-                    ],
+                        content,
+                      ],
+                    ),
                   ),
                 )
               : Scaffold(
-                  body: content,
+                  // body: content,
+                  body: CustomScrollView(
+                    slivers: [
+                      SliverAppBar(
+                        expandedHeight: 500,
+                        pinned: true,
+                        leading: isDesktop
+                            ? Container()
+                            : BackButton(
+                                onPressed: () {
+                                  setState(() {});
+                                  Navigator.pop(context);
+                                },
+                              ),
+                        backgroundColor: Colors.black38,
+                        flexibleSpace: FlexibleSpaceBar(
+                          background: Hero(
+                            tag: 'movie-poster-mobile-${widget.movie.id}',
+                            // Changed tag for mobile
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                if (widget.movie.imageUrl != null && !isDesktop)
+                                  Image.network(
+                                    widget.service
+                                        .getImageUrl(widget.movie.imageUrl),
+                                    fit: BoxFit.cover,
+                                  ),
+
+                                // Top gradient for better app bar visibility
+                                const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.center,
+                                      colors: [
+                                        Colors.black54,
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Bottom gradient for content visibility
+                                const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black87,
+                                      ],
+                                      stops: [0.6, 1.0],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(child: content),
+                    ],
+                  ),
                   bottomNavigationBar: BottomAppBar(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -535,9 +531,14 @@ class _BackdropCarouselState extends State<_BackdropCarousel> {
       onPageChanged: (index) => setState(() => _currentPage = index),
       itemCount: widget.imageUrls.length,
       itemBuilder: (context, index) {
-        return Image.network(
-          widget.imageUrls[index],
-          fit: BoxFit.cover,
+        return ClipRect(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaY: 5, sigmaX: 5,tileMode: TileMode.mirror,),
+            child: Image.network(
+              widget.imageUrls[index],
+              fit: BoxFit.cover,
+            ),
+          ),
         );
       },
     );

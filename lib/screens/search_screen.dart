@@ -105,6 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                             itemCount: _results!.length,
                             itemBuilder: (context, index) {
+                              final isDesktop = ResponsiveGrid.isDesktop(constraints);
                               final item = _results![index];
                               return MovieCard(
                                 title: item.name,
@@ -112,18 +113,29 @@ class _SearchScreenState extends State<SearchScreen> {
                                     widget.service.getImageUrl(item.imageUrl),
                                 rating: item.rating,
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => item.type == 'Movie'
-                                          ? MovieDetailsScreen(
-                                              movie: item,
-                                              service: widget.service)
-                                          : SeriesDetailsScreen(
-                                              series: item,
-                                              service: widget.service),
-                                    ),
-                                  );
+                                  if (isDesktop) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      scrollControlDisabledMaxHeightRatio: 0.9,
+                                      constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                      clipBehavior: Clip.antiAlias,
+                                      builder: (context) => Center(
+                                        child: MovieDetailsScreen(
+                                          movie: item,
+                                          service: widget.service,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => MovieDetailsScreen(
+                                          movie: item,
+                                          service: widget.service,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 },
                               );
                             },
