@@ -90,9 +90,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                 SliverAppBar(
                   expandedHeight: 500,
                   pinned: true,
-                  leading: isDesktop ? Container() : BackButton(),
-                  backgroundColor: Colors.black38,
+                  leading: isDesktop ? Container() : IconButton.filledTonal(onPressed: (){Navigator.pop(context);}, icon: Icon(Symbols.arrow_back)),
+                  // backgroundColor: Colors.black38,
                   flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
                     background: Stack(
                       fit: StackFit.expand,
                       children: [

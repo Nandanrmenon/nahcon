@@ -376,15 +376,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                       SliverAppBar(
                         expandedHeight: 500,
                         pinned: true,
-                        leading: isDesktop
-                            ? Container()
-                            : BackButton(
-                                onPressed: () {
-                                  setState(() {});
-                                  Navigator.pop(context);
-                                },
-                              ),
-                        backgroundColor: Colors.black38,
+                        leading: isDesktop ? Container() : IconButton.filledTonal(onPressed: (){Navigator.pop(context);}, icon: Icon(Symbols.arrow_back)),
                         flexibleSpace: FlexibleSpaceBar(
                           background: Hero(
                             tag: 'movie-poster-mobile-${widget.movie.id}',
