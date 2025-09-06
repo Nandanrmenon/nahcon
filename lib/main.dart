@@ -5,6 +5,7 @@ import 'package:nahcon/models/jellyfin_item.dart';
 import 'package:nahcon/services/jellyfin_service.dart';
 import 'package:nahcon/splash.dart';
 import 'package:nahcon/theme/app_theme.dart';
+import 'package:nahcon/theme/nahcon_theme.dart';
 import 'package:nahcon/utils/constants.dart';
 
 import 'screens/app.dart';
@@ -24,8 +25,10 @@ class MyApp extends StatelessWidget {
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         return MaterialApp(
           title: kAppName,
-          theme: lightTheme(dynamicScheme: lightDynamic),
-          darkTheme: darkTheme(dynamicScheme: darkDynamic),
+          // theme: lightTheme(dynamicScheme: lightDynamic),
+          // darkTheme: darkTheme(dynamicScheme: darkDynamic),
+          theme: light_nahcon(),
+          darkTheme: dark_nahcon(),
           themeMode: ThemeMode.system,
           debugShowCheckedModeBanner: false,
           home: FutureBuilder(
