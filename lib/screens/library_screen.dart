@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
+import 'package:nahcon/utils/constants.dart';
 import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
@@ -26,7 +27,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               preferredSize: Size.zero,
               child: Container(),
             )
-          : AppBar(title: const Text('Jellyfin')),
+          : AppBar(title: Text(kAppName)),
       body: Padding(
         padding: isDesktop
             ? EdgeInsets.zero
@@ -51,12 +52,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   final items = snapshot.data!;
                   return SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 250,
-                      child: CarouselView(
-                        itemExtent: 350,
-                        shrinkExtent: 0.8,
+                      height: 200,
+                      child: CarouselView.weighted(
                         itemSnapping: true,
                         enableSplash: false,
+                        flexWeights: [5, 1],
                         children: items.map((item) {
                           return Material(
                             borderRadius: BorderRadius.circular(8.0),
@@ -67,7 +67,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   showModalBottomSheet(
                                     context: context,
                                     scrollControlDisabledMaxHeightRatio: 0.9,
-                                    constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                    constraints: BoxConstraints(
+                                        minWidth: 300, maxWidth: 1200),
                                     clipBehavior: Clip.antiAlias,
                                     builder: (context) => Center(
                                       child: MovieDetailsScreen(
@@ -90,16 +91,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (item.imageUrl != null)
                                     Expanded(
                                       child: Stack(
                                         fit: StackFit.expand,
                                         children: [
-                                          Image.network(
-                                            widget.service
-                                                .getImageUrl(item.imageUrl),
-                                            fit: BoxFit.cover,
-                                          ),
+                                          item.imageUrl != null
+                                              ? Image.network(
+                                                  widget.service.getImageUrl(
+                                                      item.imageUrl),
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Expanded(
+                                                  child: Icon(Symbols.movie,
+                                                      size: 48),
+                                                ),
                                           Positioned(
                                             top: 0,
                                             left: 0,
@@ -174,10 +179,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                         ],
                                       ),
                                     )
-                                  else
-                                    const Expanded(
-                                      child: Icon(Symbols.movie, size: 48),
-                                    ),
                                 ],
                               ),
                             ),
@@ -207,10 +208,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   final items = snapshot.data!;
                   return SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 250,
-                      child: CarouselView(
-                        itemExtent: 350,
-                        shrinkExtent: 0.8,
+                      height: 200,
+                      child: CarouselView.weighted(
+
+                        flexWeights: [5, 1],
                         itemSnapping: true,
                         enableSplash: false,
                         children: items.map((item) {
@@ -223,7 +224,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   showModalBottomSheet(
                                     context: context,
                                     scrollControlDisabledMaxHeightRatio: 0.9,
-                                    constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                    constraints: BoxConstraints(
+                                        minWidth: 300, maxWidth: 1200),
                                     clipBehavior: Clip.antiAlias,
                                     builder: (context) => Center(
                                       child: MovieDetailsScreen(
@@ -354,11 +356,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   return SliverToBoxAdapter(
                     child: SizedBox(
                       height: 300,
-                      child: CarouselView(
-                        itemExtent: 200,
-                        shrinkExtent: 0.8,
+                      child: CarouselView.weighted(
+                        // itemExtent: 200,
+                        // shrinkExtent: 0.8,
                         itemSnapping: true,
                         enableSplash: false,
+                        flexWeights: [6, 3, 2],
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15)),
                         children: items.map((item) {
@@ -373,7 +376,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                 showModalBottomSheet(
                                   context: context,
                                   scrollControlDisabledMaxHeightRatio: 0.9,
-                                  constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                  constraints: BoxConstraints(
+                                      minWidth: 300, maxWidth: 1200),
                                   clipBehavior: Clip.antiAlias,
                                   builder: (context) => Center(
                                     child: MovieDetailsScreen(
