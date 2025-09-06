@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
-import 'package:nahcon/services/jellyfin_service.dart'; // Import the service
+import 'package:nahcon/services/jellyfin_service.dart';
+import 'package:nahcon/utils/constants.dart';
+import 'package:nahcon/widgets/app_logo.dart'; // Import the service
 
 class TopNav extends StatefulWidget implements PreferredSizeWidget {
   final List<NavbarItem> items;
@@ -44,11 +46,34 @@ class _TopNavState extends State<TopNav> {
         viewShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        builder: (context, controller) => IconButton(
-          icon: const Icon(Symbols.search),
-          onPressed: () {
-            controller.openView();
-          },
+        builder: (context, controller) => SizedBox(
+          height: 44,
+          child: Material(
+            type: MaterialType.button,
+            color: Theme.of(context).colorScheme.surface,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+                side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant)),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 60.0),
+              child: Row(
+                spacing: 8.0,
+                children: [
+                  Icon(
+                    Symbols.search,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  Text(
+                    'Search',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         viewHintText: 'Search for Movies or TV Show',
         suggestionsBuilder: (context, controller) async {
@@ -160,32 +185,56 @@ class _TopNavState extends State<TopNav> {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width < 400 ||
         MediaQuery.of(context).size.width > 1000;
-    return SafeArea(
-      child: Container(
-        height: widget.height,
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Row(
-          spacing: 16,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Material(
-              color: Theme.of(context).colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(999),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Row(
-                  spacing: 4,
-                  mainAxisSize: MainAxisSize.min,
-                  children: widget.items
-                      .map((item) => NavItemWidget(item: item))
-                      .toList(),
-                ),
+    return Container(
+      height: widget.height,
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Row(
+        spacing: 16,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            spacing: 8.0,
+            children: [
+              AppLogo(
+                height: 44,
+                width: 44,
+                borderRadius: 10,
+              ),
+              Visibility(
+                  visible: isDesktop,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                    opacity: isDesktop ? 1 : 0,
+                    child: Text(
+                      'nahCon',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  )),
+            ],
+          ),
+          Material(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                spacing: 4,
+                mainAxisSize: MainAxisSize.min,
+                children: widget.items
+                    .map((item) => NavItemWidget(item: item))
+                    .toList(),
               ),
             ),
-            buildSearch(),
-          ],
-        ),
+          ),
+          buildSearch(),
+        ],
       ),
     );
   }
@@ -193,6 +242,7 @@ class _TopNavState extends State<TopNav> {
 
 class NavItemWidget extends StatefulWidget {
   final NavbarItem item;
+
   const NavItemWidget({super.key, required this.item});
 
   @override
@@ -228,7 +278,7 @@ class _NavItemWidgetState extends State<NavItemWidget> {
                 ? Theme.of(context).colorScheme.onPrimary
                 : Theme.of(context).colorScheme.onSurface,
             fontWeight:
-                widget.item.isSelected ? FontWeight.bold : FontWeight.normal,
+                widget.item.isSelected ? FontWeight.w500 : FontWeight.normal,
           ),
         ),
       ),
