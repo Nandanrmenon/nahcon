@@ -267,7 +267,15 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
 
           return isDesktop
               ? Scaffold(
-                  appBar: AppBar(),
+                  appBar: AppBar(
+                    leading: IconButton.filledTonal(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Symbols.arrow_back)),
+                    backgroundColor: Colors.transparent,
+                  ),
+                  extendBodyBehindAppBar: true,
                   body: SingleChildScrollView(
                     child: Column(
                       children: [
@@ -287,8 +295,9 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                         ? ClipRect(
                                             child: ImageFiltered(
                                               imageFilter: ImageFilter.blur(
-                                                tileMode: TileMode.mirror,
-                                                  sigmaY: 5, sigmaX: 5),
+                                                  tileMode: TileMode.mirror,
+                                                  sigmaY: 5,
+                                                  sigmaX: 5),
                                               child: Image.network(
                                                 widget.service.getImageUrl(
                                                     widget.movie.imageUrl),
@@ -376,7 +385,13 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                       SliverAppBar(
                         expandedHeight: 500,
                         pinned: true,
-                        leading: isDesktop ? Container() : IconButton.filledTonal(onPressed: (){Navigator.pop(context);}, icon: Icon(Symbols.arrow_back)),
+                        leading: isDesktop
+                            ? Container()
+                            : IconButton.filledTonal(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: Icon(Symbols.arrow_back)),
                         flexibleSpace: FlexibleSpaceBar(
                           background: Hero(
                             tag: 'movie-poster-mobile-${widget.movie.id}',
@@ -529,7 +544,11 @@ class _BackdropCarouselState extends State<_BackdropCarousel> {
       itemBuilder: (context, index) {
         return ClipRect(
           child: ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaY: 5, sigmaX: 5,tileMode: TileMode.mirror,),
+            imageFilter: ImageFilter.blur(
+              sigmaY: 5,
+              sigmaX: 5,
+              tileMode: TileMode.mirror,
+            ),
             child: Image.network(
               widget.imageUrls[index],
               fit: BoxFit.cover,
