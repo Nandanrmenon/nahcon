@@ -17,8 +17,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 600;
-
+    final isDesktop = MediaQuery.of(context).size.width < 400 ||
+        MediaQuery.of(context).size.width > 1000;
     Future<void> _launchUrl(Uri _url) async {
       if (!await launchUrl(_url)) {
         throw Exception('Could not launch $_url');
@@ -95,259 +95,314 @@ class SettingsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: isDesktop
-              ? EdgeInsets.zero
-              : EdgeInsets.symmetric(horizontal: 16.0),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                  child: SizedBox(
-                height: 24,
-              )),
-              SliverToBoxAdapter(
-                child: Row(
-                  spacing: 24.0,
-                  children: [
-                    FutureBuilder<bool>(
-                      future: service.hasUserImage(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data == true) {
-                          return CircleAvatar(
-                            radius: 50,
-                            backgroundImage: null,
-                            child: ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: service.getUserImageUrl(),
-                                httpHeaders: service.getVideoHeaders(),
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.account_circle, size: 40),
-                                placeholder: (context, url) =>
-                                    const Icon(Icons.account_circle, size: 40),
-                              ),
-                            ),
-                          );
-                        }
-                        return const Icon(Symbols.account_circle, size: 40);
-                      },
+      body: isDesktop
+          ? Row(
+              children: [
+                Expanded(
+                  child: Material(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        topLeft: Radius.circular(16),
+                      ),
                     ),
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        spacing: 8.0,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 24),
+                      child: Column(
                         children: [
-                          Column(
-                            spacing: 4.0,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                service.username ?? '',
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              Text(
-                                service.serverName ?? service.baseUrl ?? '',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
+                          accountContent(context, isDesktop),
+                          ListTile(
+                            leading: const Icon(Symbols.resume_rounded),
+                            title: Text(
+                              'History',
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
                           ),
-                          FilledButton.tonal(
-                              onPressed: () async {
-                                await service.logout();
-                                if (context.mounted) {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                      builder: (context) => const LoginScreen(),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                }
-                              },
-                              child: isDesktop
-                                  ? Text('Switch Account')
-                                  : Icon(Symbols.switch_account))
+                          historyContent(),
                         ],
                       ),
                     ),
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Symbols.settings_rounded),
+                        title: Text(
+                          'Settings',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      settingContent(items),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : SafeArea(
+              child: Padding(
+                padding: isDesktop
+                    ? EdgeInsets.zero
+                    : EdgeInsets.symmetric(horizontal: 16.0),
+                child: ListView(
+                  children: [
+                    SizedBox(
+                      height: 24,
+                    ),
+                    accountContent(context, isDesktop),
+                    ListTile(
+                      leading: const Icon(Symbols.resume_rounded),
+                      title: Text(
+                        'History',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                    historyContent(),
+                    ListTile(
+                      leading: const Icon(Symbols.settings_rounded),
+                      title: Text(
+                        'Settings',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                    settingContent(items),
+                    SizedBox(
+                      height: 100,
+                    )
                   ],
                 ),
               ),
-              SliverToBoxAdapter(
-                child: ListTile(
-                  leading: const Icon(Symbols.resume_rounded),
-                  title: Text(
-                    'History',
-                    style: Theme.of(context).textTheme.labelLarge,
+            ),
+    );
+  }
+
+  Widget accountContent(BuildContext context, isDesktop) {
+    return Row(
+      spacing: 24.0,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FutureBuilder<bool>(
+          future: service.hasUserImage(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data == true) {
+              return CircleAvatar(
+                radius: 50,
+                backgroundImage: null,
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: service.getUserImageUrl(),
+                    httpHeaders: service.getVideoHeaders(),
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.account_circle, size: 40),
+                    placeholder: (context, url) =>
+                        const Icon(Icons.account_circle, size: 40),
                   ),
                 ),
+              );
+            }
+            return const Icon(Symbols.account_circle, size: 40);
+          },
+        ),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 8.0,
+            children: [
+              Column(
+                spacing: 4.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.username ?? '',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  Text(
+                    service.serverName ?? service.baseUrl ?? '',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
-              FutureBuilder<List<JellyfinItem>>(
-                future: service.getHistory(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    final items = snapshot.data!;
-                    return SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 300,
-                        child: CarouselView(
-                          itemExtent: 180,
-                          shrinkExtent: 0.8,
-                          enableSplash: false,
-                          children: items.map((item) {
-                            return Material(
-                              borderRadius: BorderRadius.circular(8.0),
-                              clipBehavior: Clip.antiAlias,
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => MovieDetailsScreen(
-                                        movie: item,
-                                        service: service,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (item.imageUrl != null)
-                                      Expanded(
-                                        child: Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            Image.network(
-                                              service
-                                                  .getImageUrl(item.imageUrl),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              left: 0,
-                                              right: 0,
-                                              bottom: 0,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    colors: [
-                                                      Colors.transparent,
-                                                      Colors.black87,
-                                                    ],
-                                                    begin: Alignment.topCenter,
-                                                    end: Alignment.bottomCenter,
-                                                  ),
-                                                ),
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              bottom: 20,
-                                              left: 20,
-                                              right: 20,
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      item.name,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyMedium!
-                                                          .copyWith(
-                                                              color:
-                                                                  Colors.white),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    else
-                                      const Expanded(
-                                        child: Icon(Symbols.movie, size: 48),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
+              FilledButton.tonal(
+                  onPressed: () async {
+                    await service.logout();
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
                         ),
-                      ),
-                    );
-                  }
-                  return const SliverToBoxAdapter(child: SizedBox());
-                },
-              ),
-              SliverList.separated(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  bool _isLastItem(int index) {
-                    if (UniversalPlatform.isWeb) {
-                      // one item hidden → last index is items.length - 1
-                      return index == items.length - 1;
-                    } else {
-                      // all items visible → last index is still items.length - 1
-                      return index == items.length - 1;
+                        (Route<dynamic> route) => false,
+                      );
                     }
-                  }
-
-                  return ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: index == 0
-                          ? Radius.circular(16.0)
-                          : Radius.circular(4.0),
-                      topRight: index == 0
-                          ? Radius.circular(16.0)
-                          : Radius.circular(4.0),
-                      bottomLeft: _isLastItem(index)
-                          ? const Radius.circular(16.0)
-                          : const Radius.circular(4.0),
-                      bottomRight: _isLastItem(index)
-                          ? const Radius.circular(16.0)
-                          : const Radius.circular(4.0),
-                    ),
-                    child: Material(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      child: ListTile(
-                        title: Text(items[index].title),
-                        leading: items[index].leading,
-                        subtitle: items[index].subtitle.isNotEmpty
-                            ? Text(items[index].subtitle)
-                            : null,
-                        onTap: () => items[index].onTap(),
-                      ),
-                    ),
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return SizedBox(
-                    height: 4,
-                  );
-                },
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 100,
-                ),
-              )
+                  },
+                  child: isDesktop
+                      ? Text('Switch Account')
+                      : Icon(Symbols.switch_account))
             ],
           ),
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget historyContent() {
+    return FutureBuilder<List<JellyfinItem>>(
+      future: service.getHistory(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final items = snapshot.data!;
+          return SizedBox(
+            height: 300,
+            child: CarouselView(
+              itemExtent: 180,
+              shrinkExtent: 0.8,
+              enableSplash: false,
+              children: items.map((item) {
+                return Material(
+                  borderRadius: BorderRadius.circular(8.0),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MovieDetailsScreen(
+                            movie: item,
+                            service: service,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (item.imageUrl != null)
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  service.getImageUrl(item.imageUrl),
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black87,
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ),
+                                    ),
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 20,
+                                  left: 20,
+                                  right: 20,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          const Expanded(
+                            child: Icon(Symbols.movie, size: 48),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        }
+        return SizedBox();
+      },
+    );
+  }
+
+  Widget settingContent(final items) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        bool _isLastItem(int index) {
+          if (UniversalPlatform.isWeb) {
+            // one item hidden → last index is items.length - 1
+            return index == items.length - 1;
+          } else {
+            // all items visible → last index is still items.length - 1
+            return index == items.length - 1;
+          }
+        }
+
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            bottomLeft: _isLastItem(index)
+                ? const Radius.circular(16.0)
+                : const Radius.circular(4.0),
+            bottomRight: _isLastItem(index)
+                ? const Radius.circular(16.0)
+                : const Radius.circular(4.0),
+          ),
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            child: ListTile(
+              title: Text(items[index].title),
+              leading: items[index].leading,
+              subtitle: items[index].subtitle.isNotEmpty
+                  ? Text(items[index].subtitle)
+                  : null,
+              onTap: () => items[index].onTap(),
+            ),
+          ),
+        );
+      },
+      separatorBuilder: (context, index) {
+        return SizedBox(
+          height: 4,
+        );
+      },
     );
   }
 }
