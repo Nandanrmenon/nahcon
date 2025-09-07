@@ -98,6 +98,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                 controller.openView();
               },
               style: FilledButton.styleFrom(
+                elevation: 2.0,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999.0)),
               ),
