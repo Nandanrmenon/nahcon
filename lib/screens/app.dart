@@ -115,6 +115,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
           ),
           viewHintText: 'Search for Movies or TV Show',
           dividerColor: Colors.transparent,
+          keyboardType: TextInputType.name,
           suggestionsBuilder: (context, controller) async {
             if (controller.text.isEmpty) {
               final randomItems = await widget.service.getSuggestions(limit: 5);

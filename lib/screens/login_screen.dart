@@ -521,6 +521,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: Icon(Symbols.person_rounded)),
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter username' : null,
+              keyboardType: TextInputType.text,
+              enableSuggestions: false,
+              spellCheckConfiguration: SpellCheckConfiguration.disabled(),
               enabled: !_isLoading,
             ),
             const SizedBox(height: 16),
@@ -530,6 +533,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Password',
                   prefixIcon: Icon(Symbols.password_rounded)),
               obscureText: true,
+              keyboardType: TextInputType.visiblePassword,
               // validator: (value) =>
               //     value?.isEmpty ?? true ? 'Please enter password' : null,
               enabled: !_isLoading,
