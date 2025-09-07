@@ -279,43 +279,7 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
-              // SliverToBoxAdapter(
-              //   child: Column(
-              //     children: [
-              //       ListTile(
-              //         leading: const Icon(Symbols.delete),
-              //         title: const Text('Clear Cache'),
-              //         onTap: () async {
-              //           await service.clearCache();
-              //           if (context.mounted) {
-              //             ScaffoldMessenger.of(context).showSnackBar(
-              //               const SnackBar(content: Text('Cache cleared')),
-              //             );
-              //           }
-              //         },
-              //       ),
-              //       ListTile(
-              //         leading: const Icon(Symbols.logout),
-              //         title: const Text('Logout'),
-              //         onTap: () async {
-              //           await service.logout();
-              //           if (context.mounted) {
-              //             Navigator.of(context).pushAndRemoveUntil(
-              //                 MaterialPageRoute(
-              //                   builder: (context) => LoginScreen(),
-              //                 ),
-              //                 (Route<dynamic> route) => false);
-              //           }
-              //         },
-              //       ),
-              //       const AboutListTile(
-              //         icon: Icon(Symbols.info),
-              //         applicationName: kAppName,
-              //         applicationVersion: kAppVersion,
-              //       ),
-              //     ],
-              //   ),
-              // ),
+              SliverToBoxAdapter(child: SizedBox(height: 100,),)
             ],
           ),
         ),

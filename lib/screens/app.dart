@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:nahcon/screens/series_details_screen.dart';
 import 'package:nahcon/widgets/navbar.dart';
 
 import '../services/jellyfin_service.dart';
 import 'library_screen.dart';
 import 'login_screen.dart';
+import 'movie_details_screen.dart';
 import 'movies_screen.dart';
 import 'search_screen.dart';
 import 'series_screen.dart';
@@ -20,8 +22,22 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends State<App> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+
+  bool _isExtended = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _isExtended = false;
+        });
+      }
+    });
+  }
 
   Widget _buildUserAvatar({double size = 24}) {
     return FutureBuilder<bool>(
@@ -61,14 +77,157 @@ class _AppState extends State<App> {
         LibraryScreen(service: widget.service),
         MoviesScreen(service: widget.service),
         SeriesScreen(service: widget.service),
-        if (!isDesktop) SearchScreen(service: widget.service),
+        // if (!isDesktop) SearchScreen(service: widget.service),
         SettingsScreen(service: widget.service),
       ],
     );
+
+    Widget buildSearch() {
+      final isDesktop = MediaQuery.of(context).size.width < 400 ||
+          MediaQuery.of(context).size.width > 1000;
+
+      return SizedBox(
+        child: SearchAnchor(
+          shrinkWrap: false,
+          isFullScreen: true,
+          viewBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          builder: (context, controller) => SizedBox(
+            height: 48,
+            child: FilledButton(
+              onPressed: () {
+                controller.openView();
+              },
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: _isExtended
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 4.0,
+                        children: [
+                          const Icon(Icons.search),
+                          const Text('Search'),
+                        ],
+                      )
+                    : const Icon(Icons.search), // smoothly collapses
+              ),
+            ),
+          ),
+          viewHintText: 'Search for Movies or TV Show',
+          dividerColor: Colors.transparent,
+          suggestionsBuilder: (context, controller) async {
+            if (controller.text.isEmpty) {
+              final randomItems = await widget.service.getSuggestions(limit: 5);
+              return [
+                const ListTile(
+                  title: Text('Suggestions for you'),
+                  enabled: false,
+                ),
+                ...randomItems.map(
+                  (item) => InkWell(
+                    onTap: () {
+                      controller.closeView(item.name);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MovieDetailsScreen(
+                            movie: item,
+                            service: widget.service,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          item.imageUrl != null
+                              ? SizedBox(
+                                  width: 50,
+                                  height: 80,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(5),
+                                    child: Image.network(
+                                      widget.service.getImageUrl(item.imageUrl),
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        print('Error loading image: $error');
+                                        return const Icon(Symbols.movie);
+                                      },
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox(
+                                  width: 40,
+                                  height: 60,
+                                  child: Icon(Symbols.movie),
+                                ),
+                          Expanded(
+                            child: Text(
+                              item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ];
+            }
+            final results = await widget.service.search(controller.text);
+            return results.map(
+              (item) => ListTile(
+                leading: item.imageUrl != null
+                    ? SizedBox(
+                        width: 40,
+                        height: 60,
+                        child: Image.network(
+                          widget.service.getImageUrl(item.imageUrl),
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : const SizedBox(
+                        width: 40,
+                        height: 60,
+                        child: Icon(Symbols.movie),
+                      ),
+                title: Text(item.name),
+                onTap: () {
+                  controller.closeView(item.name);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => item.type == 'Movie'
+                          ? MovieDetailsScreen(
+                              movie: item,
+                              service: widget.service,
+                            )
+                          : SeriesDetailsScreen(
+                              series: item,
+                              service: widget.service,
+                            ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+    }
+
     return !isDesktop
         ? Scaffold(
             body: content,
+            floatingActionButton: buildSearch(),
             bottomNavigationBar: NavigationBar(
+              labelBehavior:
+                  NavigationDestinationLabelBehavior.onlyShowSelected,
               selectedIndex: _selectedIndex,
               onDestinationSelected: (index) {
                 setState(() {
@@ -99,14 +258,6 @@ class _AppState extends State<App> {
                     fill: 1.0,
                   ),
                   label: 'Series',
-                ),
-                NavigationDestination(
-                  icon: Icon(Symbols.search_rounded),
-                  selectedIcon: Icon(
-                    Symbols.search_rounded,
-                    fill: 1.0,
-                  ),
-                  label: 'Search',
                 ),
                 GestureDetector(
                   onLongPress: _showProfileSwitcher,
