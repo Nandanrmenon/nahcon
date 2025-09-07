@@ -17,8 +17,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width < 400 ||
-        MediaQuery.of(context).size.width > 1000;
+    final isDesktop = MediaQuery.of(context).size.width > 600;
+    
     Future<void> _launchUrl(Uri _url) async {
       if (!await launchUrl(_url)) {
         throw Exception('Could not launch $_url');
