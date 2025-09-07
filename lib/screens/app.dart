@@ -97,6 +97,10 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
               onPressed: () {
                 controller.openView();
               },
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999.0)),
+              ),
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,

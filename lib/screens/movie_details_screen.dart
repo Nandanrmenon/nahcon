@@ -461,6 +461,10 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                           child: SizedBox(
                             height: 48,
                             child: FilledButton.tonal(
+                              style: FilledButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999.0)),
+                              ),
                               onPressed: () {
                                 debugPrint('watch later pressed');
                               },

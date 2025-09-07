@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
           expandedHeight: _profiles.isNotEmpty ? 200 : 400.0,
           backgroundColor: isDesktop
               ? Theme.of(context).colorScheme.surface
-              : Theme.of(context).colorScheme.secondaryContainer,
+              : Theme.of(context).colorScheme.surfaceContainerLow,
           elevation: 0,
           leading: _showLoginForm
               ? IconButton(
