@@ -46,6 +46,8 @@ dependencies:
   dynamic_color: ^1.8.1
   cached_network_image: ^3.4.1
   material_symbols_icons: ^4.2867.0
+  universal_platform: ^1.1.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

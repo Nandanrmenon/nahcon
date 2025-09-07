@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
 import 'package:nahcon/utils/constants.dart';
+import 'package:universal_platform/universal_platform.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -17,10 +19,53 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
 
+    Future<void> _launchUrl(Uri _url) async {
+      if (!await launchUrl(_url)) {
+        throw Exception('Could not launch $_url');
+      }
+    }
+
     final items = [
+      if (UniversalPlatform.isWeb)
+        ListItemData(
+          title: 'Get the app',
+          subtitle:
+              'For better experience, use the ${isDesktop ? 'desktop' : 'mobile'} app',
+          leading: Icon(Symbols.download),
+          onTap: () async {
+            await _launchUrl(
+                Uri.parse('https://github.com/Nandanrmenon/nahcon/releases'));
+          },
+        ),
+      ListItemData(
+        title: 'Github',
+        subtitle: 'Check out the source code',
+        leading: Icon(Symbols.code),
+        onTap: () async {
+          await _launchUrl(
+              Uri.parse('https://github.com/Nandanrmenon/nahcon/'));
+        },
+      ),
+      ListItemData(
+        title: 'Report Issues',
+        subtitle: '',
+        leading: Icon(Symbols.report_problem),
+        onTap: () async {
+          await _launchUrl(
+              Uri.parse('https://github.com/Nandanrmenon/nahcon/issues'));
+        },
+      ),
+      ListItemData(
+        title: 'Support Me',
+        subtitle: 'Buy me a coffee',
+        leading: Icon(Symbols.money),
+        onTap: () async {
+          await _launchUrl(Uri.parse('https://ko-fi.com/P5P41KEC9N'));
+        },
+      ),
       ListItemData(
         title: 'Clear Cache',
-        subtitle: '',
+        subtitle: 'Helps clear out your storage',
         leading: Icon(Symbols.info),
         onTap: () async {
           await service.clearCache();
@@ -43,7 +88,9 @@ class SettingsScreen extends StatelessWidget {
         title: 'Info',
         subtitle: '',
         leading: Icon(Symbols.info_rounded),
-        onTap: () {},
+        onTap: () {
+          showAboutDialog(context: context);
+        },
       ),
     ];
 
@@ -248,6 +295,16 @@ class SettingsScreen extends StatelessWidget {
               SliverList.separated(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
+                  bool _isLastItem(int index) {
+                    if (UniversalPlatform.isWeb) {
+                      // one item hidden → last index is items.length - 1
+                      return index == items.length - 1;
+                    } else {
+                      // all items visible → last index is still items.length - 1
+                      return index == items.length - 1;
+                    }
+                  }
+
                   return ClipRRect(
                     borderRadius: BorderRadius.only(
                       topLeft: index == 0
@@ -256,18 +313,21 @@ class SettingsScreen extends StatelessWidget {
                       topRight: index == 0
                           ? Radius.circular(16.0)
                           : Radius.circular(4.0),
-                      bottomLeft: index == 2
-                          ? Radius.circular(16.0)
-                          : Radius.circular(4.0),
-                      bottomRight: index == 2
-                          ? Radius.circular(16.0)
-                          : Radius.circular(4.0),
+                      bottomLeft: _isLastItem(index)
+                          ? const Radius.circular(16.0)
+                          : const Radius.circular(4.0),
+                      bottomRight: _isLastItem(index)
+                          ? const Radius.circular(16.0)
+                          : const Radius.circular(4.0),
                     ),
                     child: Material(
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       child: ListTile(
                         title: Text(items[index].title),
                         leading: items[index].leading,
+                        subtitle: items[index].subtitle.isNotEmpty
+                            ? Text(items[index].subtitle)
+                            : null,
                         onTap: () => items[index].onTap(),
                       ),
                     ),
@@ -279,7 +339,11 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 100,),)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 100,
+                ),
+              )
             ],
           ),
         ),
