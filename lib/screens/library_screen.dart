@@ -52,11 +52,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   final items = snapshot.data!;
                   return SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 200,
+                      height: isDesktop ? 350 : 200,
                       child: CarouselView.weighted(
                         itemSnapping: true,
                         enableSplash: false,
-                        flexWeights: [5, 1],
+                        flexWeights: [
+                          isDesktop ? 10 : 4,
+                          isDesktop ? 8 : 1,
+                          if(isDesktop) 6,
+                          if(isDesktop) 4,
+                          if(isDesktop) 2,
+                        ],
                         children: items.map((item) {
                           return Material(
                             borderRadius: BorderRadius.circular(8.0),
@@ -91,94 +97,92 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                    Expanded(
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          item.imageUrl != null
-                                              ? Image.network(
-                                                  widget.service.getImageUrl(
-                                                      item.imageUrl),
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : Expanded(
-                                                  child: Icon(Symbols.movie,
-                                                      size: 48),
-                                                ),
-                                          Positioned(
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.transparent,
-                                                    Colors.black87,
-                                                  ],
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                ),
+                                  Expanded(
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        item.imageUrl != null
+                                            ? Image.network(
+                                                widget.service
+                                                    .getImageUrl(item.imageUrl),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Expanded(
+                                                child: Icon(Symbols.movie,
+                                                    size: 48),
                                               ),
-                                              width: double.infinity,
-                                              height: double.infinity,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Center(
-                                              child: CircleAvatar(
-                                                backgroundColor: Colors.black54,
-                                                child: Icon(
-                                                    Symbols.play_arrow_rounded,
-                                                    color: Colors.white),
+                                        Positioned(
+                                          top: 0,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Colors.transparent,
+                                                  Colors.black87,
+                                                ],
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
                                               ),
                                             ),
+                                            width: double.infinity,
+                                            height: double.infinity,
                                           ),
-                                          Positioned(
-                                            bottom: 40,
-                                            left: 20,
-                                            right: 20,
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    item.name,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium!
-                                                        .copyWith(
-                                                            color:
-                                                                Colors.white),
-                                                  ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Center(
+                                            child: CircleAvatar(
+                                              backgroundColor: Colors.black54,
+                                              child: Icon(
+                                                  Symbols.play_arrow_rounded,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 40,
+                                          left: 20,
+                                          right: 20,
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  item.name,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyMedium!
+                                                      .copyWith(
+                                                          color: Colors.white),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
-                                          Positioned(
-                                            bottom: 20,
-                                            left: 20,
-                                            right: 20,
-                                            child: LinearProgressIndicator(
-                                              value: item.playbackProgress,
-                                              minHeight: 4,
-                                            ),
+                                        ),
+                                        Positioned(
+                                          bottom: 20,
+                                          left: 20,
+                                          right: 20,
+                                          child: LinearProgressIndicator(
+                                            value: item.playbackProgress,
+                                            minHeight: 4,
                                           ),
-                                        ],
-                                      ),
-                                    )
+                                        ),
+                                      ],
+                                    ),
+                                  )
                                 ],
                               ),
                             ),
@@ -208,10 +212,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   final items = snapshot.data!;
                   return SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 200,
+                      height: isDesktop ? 350 : 200,
                       child: CarouselView.weighted(
-
-                        flexWeights: [5, 1],
+                        flexWeights: [
+                          isDesktop ? 10 : 4,
+                          isDesktop ? 8 : 1,
+                          if(isDesktop) 6,
+                          if(isDesktop) 4,
+                          if(isDesktop) 2,
+                        ],
                         itemSnapping: true,
                         enableSplash: false,
                         children: items.map((item) {
@@ -356,12 +365,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   return SliverToBoxAdapter(
                     child: SizedBox(
                       height: 300,
-                      child: CarouselView.weighted(
-                        // itemExtent: 200,
-                        // shrinkExtent: 0.8,
+                      child: CarouselView(
+                        itemExtent: 200,
+                        shrinkExtent: 0.8,
                         itemSnapping: true,
                         enableSplash: false,
-                        flexWeights: [6, 3, 2],
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15)),
                         children: items.map((item) {
