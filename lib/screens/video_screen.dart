@@ -28,7 +28,12 @@ class VideoScreen extends StatefulWidget {
 
 class _VideoScreenState extends State<VideoScreen> {
   late final player = Player();
-  late final controller = VideoController(player);
+  late final controller = VideoController(
+    player,
+    configuration: VideoControllerConfiguration(
+      enableHardwareAcceleration: true,
+    ),
+  );
 
   AudioTrack? _selectedAudio;
   VideoTrack? _selectedVideo;
