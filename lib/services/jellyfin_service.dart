@@ -295,7 +295,10 @@ class JellyfinService {
     throw Exception('Failed to load movies');
   }
 
-  Future<List<JellyfinItem>> getAllSeries() async {
+  Future<List<JellyfinItem>> getAllSeries({String? genreId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheKey = 'series_cache_${genreId ?? 'all'}';
+    final cachedData = prefs.getString(cacheKey);
     final response = await http.get(
       Uri.parse(
           '$baseUrl/Items?IncludeItemTypes=Series&Recursive=true&SortBy=SortName'),
@@ -307,11 +310,30 @@ class JellyfinService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      await prefs.setString(cacheKey, jsonEncode(data['Items']));
       return (data['Items'] as List)
           .map((item) => JellyfinItem.fromJson(item))
           .toList();
     }
     throw Exception('Failed to load series');
+  }
+
+  Future<List<String>> getSeriesGenres() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/Genres?userId=$userId&IncludeItemTypes=Series'),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return (data['Items'] as List)
+          .map((item) => item['Name'] as String)
+          .toList();
+    }
+    throw Exception('Failed to load genres');
   }
 
   Future<JellyfinItem> getItemDetails(String itemId) async {
