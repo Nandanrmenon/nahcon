@@ -1,10 +1,9 @@
-import 'package:dynamic_color/dynamic_color.dart'; // Add this import
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:nahcon/models/jellyfin_item.dart';
 import 'package:nahcon/services/jellyfin_service.dart';
 import 'package:nahcon/splash.dart';
-// import 'package:nahcon/theme/app_theme.dart';
 import 'package:nahcon/theme/app_theme.dart';
 import 'package:nahcon/utils/constants.dart';
 
@@ -25,8 +24,6 @@ class MyApp extends StatelessWidget {
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         return MaterialApp(
           title: kAppName,
-          // theme: lightTheme(dynamicScheme: lightDynamic),
-          // darkTheme: darkTheme(dynamicScheme: darkDynamic),
           theme: lightTheme(),
           darkTheme: darkTheme(),
           themeMode: ThemeMode.system,

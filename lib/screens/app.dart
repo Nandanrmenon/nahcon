@@ -77,7 +77,6 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
         LibraryScreen(service: widget.service),
         MoviesScreen(service: widget.service),
         SeriesScreen(service: widget.service),
-        // if (!isDesktop) SearchScreen(service: widget.service),
         SettingsScreen(service: widget.service),
       ],
     );
@@ -308,7 +307,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                   label: 'Movies',
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 1; // Switch to Settings
+                      _selectedIndex = 1;
                     });
                   },
                 ),
@@ -317,7 +316,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                   label: 'Series',
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 2; // Switch to Settings
+                      _selectedIndex = 2;
                     });
                   },
                 ),
@@ -326,7 +325,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                   label: 'Me',
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 3; // Switch to Settings
+                      _selectedIndex = 3;
                     });
                   },
                 ),

@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _serverController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final FocusNode _usernameFocusNode = FocusNode(); // Add this line
+  final FocusNode _usernameFocusNode = FocusNode();
   final _jellyfinService = JellyfinService();
 
   bool _isLoading = false;
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _serverController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
-    _usernameFocusNode.dispose(); // Dispose the focus node
+    _usernameFocusNode.dispose();
     super.dispose();
   }
 
@@ -213,9 +213,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
-    // If server was selected, scroll to login form and focus username
+
     if (_selectedServerForAddUser != null) {
-      FocusScope.of(context).requestFocus(_usernameFocusNode); // Use FocusNode
+      FocusScope.of(context).requestFocus(_usernameFocusNode);
     }
   }
 

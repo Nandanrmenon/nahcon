@@ -15,7 +15,7 @@ class JellyfinService {
   String? baseUrl;
   String? accessToken;
   String? userId;
-  String? username; // Added username property
+  String? username;
   String? serverName;
   static const String _clientName = 'nahCon';
   static const String _deviceId = 'flutter_app_1';
@@ -35,11 +35,9 @@ class JellyfinService {
         'Content-Type': 'application/json',
       };
 
-  // Helper to generate a unique profile id
   String _profileId(String serverUrl, String username) =>
       '${serverUrl.trim()}|${username.trim()}';
 
-  // Save or update a profile (serverUrl, username, password, accessToken, userId, serverName)
   Future<void> saveProfile({
     required String serverUrl,
     required String username,
@@ -60,6 +58,7 @@ class JellyfinService {
       'userId': userId,
       'serverName': serverName,
     });
+
     // Remove old if exists
     profiles.removeWhere((p) => jsonDecode(p)['id'] == id);
     profiles.add(profile);
@@ -129,15 +128,12 @@ class JellyfinService {
   }
 
   Future<bool> login(String serverUrl, String username, String password) async {
-    await clearCache(); // Clear cache on new login
+    await clearCache();
     try {
       baseUrl = serverUrl.trim();
       if (baseUrl!.endsWith('/')) {
         baseUrl = baseUrl!.substring(0, baseUrl!.length - 1);
       }
-
-      // print('Attempting login to: $baseUrl');
-      // print('Headers: $_defaultHeaders');
 
       final response = await http.post(
         Uri.parse('$baseUrl/Users/AuthenticateByName'),
@@ -149,16 +145,12 @@ class JellyfinService {
         }),
       );
 
-      // print('Response status: ${response.statusCode}');
-      // print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         accessToken = data['AccessToken'];
         userId = data['User']['Id'];
-        this.username = username; // Store username
+        this.username = username;
 
-        // Save credentials as a profile
         await fetchServerInfo();
         await saveProfile(
           serverUrl: baseUrl!,
@@ -360,10 +352,9 @@ class JellyfinService {
       );
 
       if (response.statusCode == 401) {
-        // Try to reauthorize
         final success = await tryAutoLogin();
         if (success) {
-          return getItemDetails(itemId); // Retry after reauth
+          return getItemDetails(itemId);
         }
       }
 
@@ -397,7 +388,7 @@ class JellyfinService {
         accessToken = profile['accessToken'];
         userId = profile['userId'];
         serverName = profile['serverName'];
-        // Try to login with saved credentials
+
         return await login(
           profile['serverUrl'],
           profile['username'],
@@ -574,7 +565,7 @@ class JellyfinService {
     baseUrl = null;
     accessToken = null;
     userId = null;
-    username = null; // Clear username on logout
+    username = null;
   }
 
   Future<bool> validateServer(String serverUrl) async {
@@ -616,8 +607,6 @@ class JellyfinService {
         },
       );
 
-      // print('Search response: ${response.statusCode} ${response.body}');
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['Items'] as List)
@@ -652,7 +641,6 @@ class JellyfinService {
     }
   }
 
-  /// Fetch the saved playback position (in milliseconds) for a media item.
   Future<Duration?> getPlaybackPosition(String itemId) async {
     if (userId == null || accessToken == null || baseUrl == null) return null;
     final response = await http.get(

@@ -4,7 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class MovieCard extends StatefulWidget {
   final String title;
-  final String? posterUrl; // Make posterUrl nullable
+  final String? posterUrl;
   final String? releaseDate;
   final double? rating;
   final VoidCallback onTap;
@@ -12,7 +12,7 @@ class MovieCard extends StatefulWidget {
   const MovieCard({
     super.key,
     required this.title,
-    this.posterUrl, // Update constructor
+    this.posterUrl,
     this.releaseDate,
     this.rating,
     required this.onTap,

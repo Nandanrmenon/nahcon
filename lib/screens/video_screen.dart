@@ -37,7 +37,6 @@ class _VideoScreenState extends State<VideoScreen> {
   bool _showAppBar = true;
   Timer? _hideTimer;
 
-  // Add this to track last mouse position for desktop
   Offset? _lastMousePosition;
 
   Duration? _initialPosition;
@@ -85,18 +84,16 @@ class _VideoScreenState extends State<VideoScreen> {
         _selectedSubtitle = player.state.track.subtitle;
       });
     });
-    // Periodically save progress every 10 seconds
     _progressSaveTimer =
         Timer.periodic(const Duration(seconds: 10), (_) => _saveProgress());
   }
 
   Future<void> _loadAndSeekToProgress() async {
-    // Fetch saved progress from Jellyfin
     final saved = await widget.service.getPlaybackPosition(widget.itemId);
     print(saved);
     if (saved != null && saved > Duration(seconds: 5)) {
       _initialPosition = saved;
-      // Wait for player to be ready
+
       await player.stream.position.first;
       await player.seek(saved);
     }
@@ -107,7 +104,7 @@ class _VideoScreenState extends State<VideoScreen> {
     if (!_progressLoaded) return;
     final pos = player.state.position;
     final dur = player.state.duration;
-    // Only save if duration is valid
+
     if (dur > Duration.zero) {
       await widget.service.savePlaybackPosition(
         itemId: widget.itemId,
@@ -122,7 +119,7 @@ class _VideoScreenState extends State<VideoScreen> {
   void dispose() {
     _hideTimer?.cancel();
     _progressSaveTimer?.cancel();
-    _saveProgress(isPaused: true); // Save on exit/pause
+    _saveProgress(isPaused: true);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     player.dispose();
@@ -399,11 +396,8 @@ class _VideoScreenState extends State<VideoScreen> {
         autofocus: true,
         child: MaterialVideoControlsTheme(
           normal: MaterialVideoControlsThemeData(
-            // Modify theme options:
-
             buttonBarButtonSize: 24.0,
             buttonBarButtonColor: Colors.white,
-            // Modify top button bar:
             topButtonBarMargin:
                 EdgeInsets.only(bottom: 56, left: 48, right: 48),
             topButtonBar: [
@@ -414,9 +408,7 @@ class _VideoScreenState extends State<VideoScreen> {
                       player.playOrPause();
                     });
                     _saveProgress(isPaused: !player.state.playing);
-                    setState(() {
-
-                    });
+                    setState(() {});
                     Navigator.pop(context);
                   },
                   icon: const Icon(Symbols.arrow_back)),
@@ -482,7 +474,6 @@ class _VideoScreenState extends State<VideoScreen> {
                 ),
               ),
             ],
-
             bottomButtonBarMargin:
                 EdgeInsets.only(bottom: 56, left: 48, right: 48),
             bottomButtonBar: [
@@ -505,8 +496,6 @@ class _VideoScreenState extends State<VideoScreen> {
             volumeGesture: true,
           ),
           fullscreen: const MaterialVideoControlsThemeData(
-            // Modify fullscreen options:
-
             buttonBarButtonSize: 32.0,
             buttonBarButtonColor: Colors.white,
           ),
@@ -516,7 +505,6 @@ class _VideoScreenState extends State<VideoScreen> {
             body: isDesktop
                 ? MouseRegion(
                     onHover: (event) {
-                      // Only show controls if mouse actually moved
                       if (_lastMousePosition != event.position) {
                         _lastMousePosition = event.position;
                         _showControls();
@@ -529,8 +517,6 @@ class _VideoScreenState extends State<VideoScreen> {
                         textScaler: TextScaler.linear(isDesktop ? 1 : 0.6),
                       ),
                       controls: MaterialVideoControls,
-                      // onPause: () => _saveProgress(isPaused: true),
-                      // onPlay: () => _saveProgress(isPaused: false),
                     ),
                   )
                 : GestureDetector(
@@ -543,8 +529,6 @@ class _VideoScreenState extends State<VideoScreen> {
                       ),
                       filterQuality: FilterQuality.high,
                       controls: MaterialVideoControls,
-                      // onPause: () => _saveProgress(isPaused: true),
-                      // onPlay: () => _saveProgress(isPaused: false),
                     ),
                   ),
           ),

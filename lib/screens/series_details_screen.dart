@@ -91,7 +91,6 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                   expandedHeight: 500,
                   pinned: true,
                   leading: isDesktop ? Container() : IconButton.filledTonal(onPressed: (){Navigator.pop(context);}, icon: Icon(Symbols.arrow_back)),
-                  // backgroundColor: Colors.black38,
                   flexibleSpace: FlexibleSpaceBar(
                     collapseMode: CollapseMode.parallax,
                     background: Stack(
@@ -253,8 +252,6 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                             return Column(
                               children: [
                                 ListTile(
-                                  // contentPadding: const EdgeInsets.symmetric(
-                                  //     horizontal: 16.0),
                                   title: Text(
                                     'Episodes: ${episodes.length}',
                                     style:
@@ -403,7 +400,6 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                             );
                           },
                         ),
-                      // If no season is selected, show the season picker button
                       if (_selectedSeason == null)
                         ListTile(
                           contentPadding:
@@ -506,7 +502,6 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
   }
 }
 
-// Add BackdropCarousel class from MovieDetailsScreen
 class _BackdropCarousel extends StatefulWidget {
   final List<String> imageUrls;
 
@@ -575,7 +570,6 @@ class _BackdropCarouselState extends State<_BackdropCarousel> {
             );
           },
         ),
-        // Overlay gradients for better visibility
         const Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(

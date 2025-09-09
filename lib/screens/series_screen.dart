@@ -22,7 +22,6 @@ class _SeriesScreenState extends State<SeriesScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _fetchGenres();
   }

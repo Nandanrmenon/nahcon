@@ -18,7 +18,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
-    
+
     Future<void> _launchUrl(Uri _url) async {
       if (!await launchUrl(_url)) {
         throw Exception('Could not launch $_url');
@@ -147,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
               ],
             )
           : SafeArea(
-        top: UniversalPlatform.isAndroid ? true :false,
+              top: UniversalPlatform.isAndroid ? true : false,
               child: Padding(
                 padding: isDesktop
                     ? EdgeInsets.zero
@@ -360,7 +360,11 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               spacing: 16.0,
               children: [
-                Icon(Symbols.heart_broken_rounded, fill: 1.0, color: Colors.redAccent,),
+                Icon(
+                  Symbols.heart_broken_rounded,
+                  fill: 1.0,
+                  color: Colors.redAccent,
+                ),
                 Text(
                   'Start watching movies or series to see your watch history',
                   style: Theme.of(context).textTheme.labelMedium,
@@ -382,10 +386,8 @@ class SettingsScreen extends StatelessWidget {
       itemBuilder: (context, index) {
         bool _isLastItem(int index) {
           if (UniversalPlatform.isWeb) {
-            // one item hidden → last index is items.length - 1
             return index == items.length - 1;
           } else {
-            // all items visible → last index is still items.length - 1
             return index == items.length - 1;
           }
         }

@@ -78,7 +78,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   final isDesktop = ResponsiveGrid.isDesktop(constraints);
                   return FutureBuilder<List<JellyfinItem>>(
                     key: ValueKey(
-                        selectedGenre), // Force rebuild on genre change
+                        selectedGenre),
                     future: widget.service.getAllMovies(genreId: selectedGenre),
                     builder: (context, snapshot) {
                       if (_isLoading && !snapshot.hasData) {

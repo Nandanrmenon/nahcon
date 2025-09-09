@@ -289,11 +289,11 @@ class _NavItemWidgetState extends State<NavItemWidget> {
 class NavbarItem {
   final String label;
   final VoidCallback onTap;
-  final bool isSelected; // Add this
+  final bool isSelected;
 
   NavbarItem({
     required this.label,
     required this.onTap,
-    this.isSelected = false, // Add this
+    this.isSelected = false,
   });
 }

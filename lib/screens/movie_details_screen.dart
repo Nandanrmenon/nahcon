@@ -40,7 +40,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
       _cachedDetails = details;
       return details;
     } catch (e) {
-      // Try to reauthorize and fetch again
       if (await widget.service.tryAutoLogin()) {
         return await widget.service.getItemDetails(widget.movie.id);
       }
@@ -55,7 +54,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
     final poster = widget.movie.imageUrl != null
         ? Hero(
             tag:
-                'movie-poster-desktop-${widget.movie.id}', // Changed tag for desktop
+                'movie-poster-desktop-${widget.movie.id}',
             child: CachedNetworkImage(
               imageUrl: widget.service.getImageUrl(widget.movie.imageUrl),
               fit: BoxFit.cover,
@@ -133,7 +132,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                           .colorScheme
                                           .onSurfaceVariant),
                             ),
-                          // Text(widget.movie.)
                         ],
                       ),
                     ),
@@ -260,7 +258,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 80), // Space for FAB
+                const SizedBox(height: 80),
               ],
             ),
           );
@@ -290,7 +288,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                 builder: (context, snapshot) {
                                   if (!snapshot.hasData ||
                                       snapshot.data!.isEmpty) {
-                                    // fallback to poster if no backdrops
                                     return widget.movie.imageUrl != null
                                         ? ClipRect(
                                             child: ImageFiltered(
@@ -379,7 +376,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                   ),
                 )
               : Scaffold(
-                  // body: content,
                   body: CustomScrollView(
                     slivers: [
                       SliverAppBar(
@@ -395,7 +391,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                         flexibleSpace: FlexibleSpaceBar(
                           background: Hero(
                             tag: 'movie-poster-mobile-${widget.movie.id}',
-                            // Changed tag for mobile
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -405,8 +400,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                         .getImageUrl(widget.movie.imageUrl),
                                     fit: BoxFit.cover,
                                   ),
-
-                                // Top gradient for better app bar visibility
                                 const DecoratedBox(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -419,7 +412,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                     ),
                                   ),
                                 ),
-                                // Bottom gradient for content visibility
                                 const DecoratedBox(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(

@@ -23,10 +23,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 2), () {
-      // Navigate to your next screen here
-      // Navigator.pushReplacementNamed(context, '/home');
-    });
+    Future.delayed(const Duration(seconds: 2), () {});
   }
 
   @override
@@ -43,16 +40,6 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 24,
           children: [
-            // ScaleTransition(
-            //   scale: _animation,
-            //   child: const Text(
-            //     'nahCon',
-            //     style: TextStyle(
-            //       fontSize: 48,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
             SizedBox(
               height: 128,
               width: 128,
@@ -64,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen>
                 .untint(color: Colors.white)
                 .blurXY(begin: 12, duration: Duration(milliseconds: 400))
                 .scaleXY(begin: 1.5, duration: Duration(milliseconds: 400)),
-
             const Text(
               kAppName,
               style: TextStyle(
