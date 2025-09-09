@@ -147,6 +147,7 @@ class SettingsScreen extends StatelessWidget {
               ],
             )
           : SafeArea(
+        top: UniversalPlatform.isAndroid ? true :false,
               child: Padding(
                 padding: isDesktop
                     ? EdgeInsets.zero
@@ -353,7 +354,22 @@ class SettingsScreen extends StatelessWidget {
             ),
           );
         }
-        return SizedBox();
+        return Card.filled(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              spacing: 16.0,
+              children: [
+                Icon(Symbols.heart_broken_rounded, fill: 1.0, color: Colors.redAccent,),
+                Text(
+                  'Start watching movies or series to see your watch history',
+                  style: Theme.of(context).textTheme.labelMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }

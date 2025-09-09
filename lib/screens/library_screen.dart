@@ -59,9 +59,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         flexWeights: [
                           isDesktop ? 10 : 4,
                           isDesktop ? 8 : 1,
-                          if(isDesktop) 6,
-                          if(isDesktop) 4,
-                          if(isDesktop) 2,
+                          if (isDesktop) 6,
+                          if (isDesktop) 4,
+                          if (isDesktop) 2,
                         ],
                         children: items.map((item) {
                           return Material(
@@ -192,7 +192,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   );
                 }
-                return const SliverToBoxAdapter(child: SizedBox());
+                return SliverToBoxAdapter(
+                  child: Card.filled(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Start watching movies & series to pick up where you left off.',
+                        style: Theme.of(context).textTheme.labelMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
             // Next Up Section
@@ -217,9 +228,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         flexWeights: [
                           isDesktop ? 10 : 4,
                           isDesktop ? 8 : 1,
-                          if(isDesktop) 6,
-                          if(isDesktop) 4,
-                          if(isDesktop) 2,
+                          if (isDesktop) 6,
+                          if (isDesktop) 4,
+                          if (isDesktop) 2,
                         ],
                         itemSnapping: true,
                         enableSplash: false,
@@ -345,7 +356,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   );
                 }
-                return const SliverToBoxAdapter(child: SizedBox());
+                return SliverToBoxAdapter(
+                  child: Card.filled(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Watch the upcoming episode',
+                        style: Theme.of(context).textTheme.labelMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
             SliverToBoxAdapter(
