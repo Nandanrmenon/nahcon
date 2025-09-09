@@ -25,42 +25,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
     _fetchGenres();
   }
 
-  // void _showFilterSheet() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     showDragHandle: true,
-  //     builder: (context) => FutureBuilder<List<String>>(
-  //       future: widget.service.getMovieGenres(),
-  //       builder: (context, snapshot) {
-  //         if (!snapshot.hasData) {
-  //           return const Center(child: CircularProgressIndicator());
-  //         }
-  //         return ListView.builder(
-  //           itemCount: snapshot.data!.length + 1,
-  //           itemBuilder: (context, index) {
-  //             final isAll = index == 0;
-  //             final genre = isAll ? 'All' : snapshot.data![index - 1];
-  //             final isSelected =
-  //                 isAll ? selectedGenre == null : genre == selectedGenre;
-
-  //             return ListTile(
-  //               trailing: isSelected ? const Icon(Icons.check) : null,
-  //               title: Text(genre),
-  //               onTap: () {
-  //                 setState(() {
-  //                   selectedGenre = isAll ? null : genre;
-  //                   _isLoading = true;
-  //                 });
-  //                 Navigator.pop(context);
-  //               },
-  //             );
-  //           },
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
-
   Future<void> _fetchGenres() async {
     final genres = await widget.service.getMovieGenres();
     setState(() {
@@ -71,20 +35,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   elevation: 0,
-      //   scrolledUnderElevation: 0,
-      //   centerTitle: false,
-      //   // title: ElevatedButton.icon(
-      //   //   iconAlignment: IconAlignment.end,
-      //   //   icon: const Icon(Icons.arrow_drop_down),
-      //   //   label: Text(
-      //   //     selectedGenre ?? 'All ',
-      //   //   ),
-      //   //   onPressed: _showFilterSheet,
-      //   // ),
-      //   // bottom: PreferredSize(preferredSize: preferredSize, child: child),
-      // ),
       body: SafeArea(
         child: Column(
           children: [
