@@ -1,75 +1,63 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
-import 'package:nahcon/screens/login_screen.dart';
+import 'package:nahcon/services/jellyfin_service.dart';
+import 'package:nahcon/widgets/m_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_platform/universal_platform.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../models/jellyfin_item.dart';
-import '../services/jellyfin_service.dart';
-import 'movie_details_screen.dart';
-
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final JellyfinService service;
-
   const SettingsScreen({super.key, required this.service});
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late SharedPreferences pref;
+  bool enableHW = true;
+
+  @override
+  void initState() {
+    loadPref();
+    super.initState();
+    
+  }
+
+  Future<void> loadPref() async {
+    pref = await SharedPreferences.getInstance();
+    setState(() {
+      enableHW = pref.getBool("is_hw_enabled") ?? true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDesktop = UniversalPlatform.isDesktop
-        ? (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.width > 1000)
-        : MediaQuery.of(context).size.width > 600;
-
-    Future<void> openUrl(Uri url) async {
-      if (!await launchUrl(url)) {
-        throw Exception('Could not launch $url');
-      }
-    }
-
-    final items = [
-      if (UniversalPlatform.isWeb)
-        ListItemData(
-          title: 'Get the app',
-          subtitle:
-              'For better experience, use the ${isDesktop ? 'desktop' : 'mobile'} app',
-          leading: Icon(Symbols.download),
-          onTap: () async {
-            await openUrl(
-                Uri.parse('https://github.com/Nandanrmenon/nahcon/releases'));
-          },
-        ),
-      ListItemData(
-        title: 'Github',
-        subtitle: 'Check out the source code',
-        leading: Icon(Symbols.code),
-        onTap: () async {
-          await openUrl(Uri.parse('https://github.com/Nandanrmenon/nahcon/'));
-        },
-      ),
-      ListItemData(
-        title: 'Report Issues',
-        subtitle: '',
-        leading: Icon(Symbols.report_problem),
-        onTap: () async {
-          await openUrl(
-              Uri.parse('https://github.com/Nandanrmenon/nahcon/issues'));
-        },
-      ),
-      ListItemData(
-        title: 'Support Me',
-        subtitle: 'Buy me a coffee',
-        leading: Icon(Symbols.money),
-        onTap: () async {
-          await openUrl(Uri.parse('https://ko-fi.com/P5P41KEC9N'));
-        },
-      ),
-      ListItemData(
+    final itemPlaybackSettings = [
+      MListItemData(
+          title: 'Hardware Acceleration',
+          subtitle: 'Uses your GPU to render video',
+          suffix: Switch(
+            value: enableHW,
+            onChanged: (value) {
+              setState(() {
+                enableHW = value;
+                pref.setBool('is_hw_enabled', value);
+              });
+            },
+          ),
+          onTap: () {
+            setState(() {
+              enableHW = !enableHW;
+              pref.setBool('is_hw_enabled', enableHW);
+            });
+          }),
+    ];
+    final itemTroubleshooting = [
+      MListItemData(
         title: 'Clear Cache',
         subtitle: 'Helps clear out your storage',
-        leading: Icon(Symbols.info),
         onTap: () async {
-          await service.clearCache();
+          await widget.service.clearCache();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -79,303 +67,39 @@ class SettingsScreen extends StatelessWidget {
           }
         },
       ),
-      ListItemData(
-        title: 'Logout',
-        subtitle: '',
-        leading: Icon(Symbols.logout_rounded),
-        onTap: () {},
-      ),
-      ListItemData(
-        title: 'Info',
-        subtitle: '',
-        leading: Icon(Symbols.info_rounded),
-        onTap: () {
-          showAboutDialog(context: context);
-        },
-      ),
     ];
-
     return Scaffold(
-      body: isDesktop
-          ? Row(
-              children: [
-                Expanded(
-                  child: Material(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        topLeft: Radius.circular(16),
-                      ),
-                    ),
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 24),
-                      child: Column(
-                        children: [
-                          accountContent(context, isDesktop),
-                          ListTile(
-                            leading: const Icon(Symbols.resume_rounded),
-                            title: Text(
-                              'History',
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                          ),
-                          historyContent(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 48,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Symbols.settings_rounded),
-                        title: Text(
-                          'Settings',
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                      ),
-                      settingContent(items),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : SafeArea(
-              top: UniversalPlatform.isAndroid ? true : false,
-              child: Padding(
-                padding: isDesktop
-                    ? EdgeInsets.zero
-                    : EdgeInsets.symmetric(horizontal: 16.0),
-                child: ListView(
-                  children: [
-                    SizedBox(
-                      height: 24,
-                    ),
-                    accountContent(context, isDesktop),
-                    ListTile(
-                      leading: const Icon(Symbols.resume_rounded),
-                      title: Text(
-                        'History',
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ),
-                    historyContent(),
-                    ListTile(
-                      leading: const Icon(Symbols.settings_rounded),
-                      title: Text(
-                        'Settings',
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ),
-                    settingContent(items),
-                    SizedBox(
-                      height: 100,
-                    )
-                  ],
-                ),
-              ),
-            ),
-    );
-  }
-
-  Widget accountContent(BuildContext context, isDesktop) {
-    return Row(
-      spacing: 24.0,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FutureBuilder<bool>(
-          future: service.hasUserImage(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data == true) {
-              return CircleAvatar(
-                radius: 50,
-                backgroundImage: null,
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: service.getUserImageUrl(),
-                    httpHeaders: service.getVideoHeaders(),
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.account_circle, size: 40),
-                    placeholder: (context, url) =>
-                        const Icon(Icons.account_circle, size: 40),
-                  ),
-                ),
-              );
-            }
-            return const Icon(Symbols.account_circle, size: 40);
-          },
-        ),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 8.0,
+      appBar: AppBar(
+        title: Text('Settings'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            spacing: 24.0,
             children: [
               Column(
-                spacing: 4.0,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8.0,
                 children: [
-                  Text(
-                    service.username ?? '',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  MListHeader(
+                    title: 'Playback Settings',
                   ),
-                  Text(
-                    service.serverName ?? service.baseUrl ?? '',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  MListView(items: itemPlaybackSettings),
                 ],
               ),
-              FilledButton.tonal(
-                  onPressed: () async {
-                    await service.logout();
-                    if (context.mounted) {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                        (Route<dynamic> route) => false,
-                      );
-                    }
-                  },
-                  child: isDesktop
-                      ? Text('Switch Account')
-                      : Icon(Symbols.switch_account))
+              Column(
+                spacing: 8.0,
+                children: [
+                  MListHeader(
+                    title: 'Troubleshooting',
+                  ),
+                  MListView(items: itemTroubleshooting),
+                ],
+              ),
             ],
           ),
         ),
-      ],
-    );
-  }
-
-  Widget historyContent() {
-    return FutureBuilder<List<JellyfinItem>>(
-      future: service.getHistory(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final items = snapshot.data!;
-          return SizedBox(
-            height: 300,
-            child: CarouselView(
-              itemExtent: 180,
-              shrinkExtent: 0.8,
-              enableSplash: false,
-              children: items.map((item) {
-                return Material(
-                  borderRadius: BorderRadius.circular(8.0),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MovieDetailsScreen(
-                            movie: item,
-                            service: service,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (item.imageUrl != null)
-                          Expanded(
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  service.getImageUrl(item.imageUrl),
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.transparent,
-                                          Colors.black87,
-                                        ],
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                      ),
-                                    ),
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 20,
-                                  left: 20,
-                                  right: 20,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .copyWith(color: Colors.white),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          const Expanded(
-                            child: Icon(Symbols.movie, size: 48),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          );
-        }
-        return Card.filled(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              spacing: 16.0,
-              children: [
-                Icon(
-                  Symbols.heart_broken_rounded,
-                  fill: 1.0,
-                  color: Colors.redAccent,
-                ),
-                Text(
-                  'Start watching movies or series to see your watch history',
-                  style: Theme.of(context).textTheme.labelMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      ),
     );
   }
 
@@ -424,18 +148,4 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
-}
-
-class ListItemData {
-  final String title;
-  final String subtitle;
-  final Function onTap;
-  final Widget leading;
-
-  ListItemData({
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    required this.leading,
-  });
 }

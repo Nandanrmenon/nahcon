@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/jellyfin_service.dart';
 
@@ -28,16 +29,14 @@ class VideoScreen extends StatefulWidget {
 
 class _VideoScreenState extends State<VideoScreen> {
   late final player = Player();
-  late final controller = VideoController(
-    player,
-    configuration: VideoControllerConfiguration(
-      enableHardwareAcceleration: true,
-    ),
-  );
+  late final controller;
 
   AudioTrack? _selectedAudio;
   VideoTrack? _selectedVideo;
   SubtitleTrack? _selectedSubtitle;
+
+  late SharedPreferences pref;
+  bool enableHW = true;
 
   bool _showAppBar = true;
   Timer? _hideTimer;
@@ -66,9 +65,22 @@ class _VideoScreenState extends State<VideoScreen> {
     }
   }
 
+  Future<void> loadPref() async {
+    pref = await SharedPreferences.getInstance();
+    setState(() {
+      enableHW = pref.getBool("is_hw_enabled") ?? true;
+    });
+    controller = VideoController(
+      player,
+      configuration: VideoControllerConfiguration(
+        enableHardwareAcceleration: enableHW,
+      ),
+    );
+  }
+
   @override
   void initState() {
-    super.initState();
+    loadPref();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -91,11 +103,11 @@ class _VideoScreenState extends State<VideoScreen> {
     });
     _progressSaveTimer =
         Timer.periodic(const Duration(seconds: 10), (_) => _saveProgress());
+    super.initState();
   }
 
   Future<void> _loadAndSeekToProgress() async {
     final saved = await widget.service.getPlaybackPosition(widget.itemId);
-    print(saved);
     if (saved != null && saved > Duration(seconds: 5)) {
       _initialPosition = saved;
 
@@ -234,127 +246,6 @@ class _VideoScreenState extends State<VideoScreen> {
               ),
             );
           },
-        );
-      },
-    );
-  }
-
-  void _showTrackSelector() async {
-    final tracks = player.state.tracks;
-    final currentAudio = player.state.track.audio;
-    final currentVideo = player.state.track.video;
-    final currentSubtitle = player.state.track.subtitle;
-
-    showDialog(
-      useSafeArea: false,
-      context: context,
-      builder: (context) {
-        return Dialog.fullscreen(
-          backgroundColor: Colors.transparent,
-          child: Scaffold(
-            backgroundColor: Colors.black54,
-            appBar: AppBar(),
-            body: SafeArea(
-              child: StatefulBuilder(
-                builder: (context, setModalState) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        if (tracks.audio.isNotEmpty) ...[
-                          const Text('Audio Tracks',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          ...tracks.audio.map((track) {
-                            return RadioGroup<AudioTrack>(
-                                onChanged: (val) async {
-                                  if (val != null) {
-                                    await player.setAudioTrack(val);
-                                    setModalState(() => _selectedAudio = val);
-                                    setState(() => _selectedAudio = val);
-                                  }
-                                },
-                                groupValue: _selectedAudio ?? currentAudio,
-                                child: ListTile(
-                                  leading: Radio<AudioTrack>(
-                                      toggleable: true, value: track),
-                                  title: Text(track.title ?? 'Audio'),
-                                  subtitle: track.language != null
-                                      ? Text(track.language!)
-                                      : null,
-                                ));
-                          }),
-                          const Divider(),
-                        ],
-                        if (tracks.video.isNotEmpty) ...[
-                          const Text('Video Tracks',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          ...tracks.video.map((track) {
-                            return RadioGroup<VideoTrack>(
-                                onChanged: (val) async {
-                                  if (val != null) {
-                                    await player.setVideoTrack(val);
-                                    setModalState(() => _selectedVideo = val);
-                                    setState(() => _selectedVideo = val);
-                                  }
-                                },
-                                groupValue: _selectedVideo ?? currentVideo,
-                                child: ListTile(
-                                  leading: Radio<VideoTrack>(
-                                      toggleable: true, value: track),
-                                  title: Text(track.title ?? 'Video'),
-                                  subtitle: track.language != null
-                                      ? Text(track.language!)
-                                      : null,
-                                ));
-                          }),
-                          const Divider(),
-                        ],
-                        if (tracks.subtitle.isNotEmpty) ...[
-                          const Text('Subtitles',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          RadioGroup<SubtitleTrack>(
-                              onChanged: (val) async {
-                                await player.setSubtitleTrack(val!);
-                                setModalState(() => _selectedSubtitle = val);
-                                setState(() => _selectedSubtitle = val);
-                              },
-                              groupValue: _selectedSubtitle ?? currentSubtitle,
-                              child: ListTile(
-                                leading: Radio<SubtitleTrack>(
-                                    toggleable: true,
-                                    value: SubtitleTrack.no()),
-                                title: Text('None'),
-                              )),
-                          ...tracks.subtitle.map((track) {
-                            return RadioGroup<SubtitleTrack>(
-                                onChanged: (val) async {
-                                  if (val != null) {
-                                    await player.setSubtitleTrack(val);
-                                    setModalState(
-                                        () => _selectedSubtitle = val);
-                                    setState(() => _selectedSubtitle = val);
-                                  }
-                                },
-                                groupValue:
-                                    _selectedSubtitle ?? currentSubtitle,
-                                child: ListTile(
-                                  leading: Radio<SubtitleTrack>(
-                                      toggleable: true, value: track),
-                                  title: Text(track.title ?? 'Subtitle'),
-                                  subtitle: track.language != null
-                                      ? Text(track.language!)
-                                      : null,
-                                ));
-                          }),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
         );
       },
     );
