@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
     final isDesktop = UniversalPlatform.isDesktop
         ? (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.width > 1000)
-        : MediaQuery.of(context).size.width > 400;
+        : MediaQuery.of(context).size.width > 600;
 
     Future<void> openUrl(Uri url) async {
       if (!await launchUrl(url)) {
