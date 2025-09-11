@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
+import 'package:nahcon/screens/video_screen.dart';
 import 'package:nahcon/utils/constants.dart';
 import 'package:nahcon/widgets/movie_card.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -17,6 +19,37 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
+  void showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Coming soon!! Sorry for the inconvenience.')));
+  }
+
+  void showDetailScreen(dynamic isDesktop, item) {
+    if (isDesktop) {
+      showModalBottomSheet(
+        context: context,
+        scrollControlDisabledMaxHeightRatio: 0.9,
+        constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+        clipBehavior: Clip.antiAlias,
+        builder: (context) => Center(
+          child: MovieDetailsScreen(
+            movie: item,
+            service: widget.service,
+          ),
+        ),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MovieDetailsScreen(
+            movie: item,
+            service: widget.service,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
@@ -64,126 +97,164 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           if (isDesktop) 2,
                         ],
                         children: items.map((item) {
-                          return Material(
-                            borderRadius: BorderRadius.circular(8.0),
-                            clipBehavior: Clip.antiAlias,
-                            child: InkWell(
-                              onTap: () {
-                                if (isDesktop) {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    scrollControlDisabledMaxHeightRatio: 0.9,
-                                    constraints: BoxConstraints(
-                                        minWidth: 300, maxWidth: 1200),
-                                    clipBehavior: Clip.antiAlias,
-                                    builder: (context) => Center(
-                                      child: MovieDetailsScreen(
-                                        movie: item,
-                                        service: widget.service,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => MovieDetailsScreen(
-                                        movie: item,
-                                        service: widget.service,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          return ContextMenuWidget(
+                            menuProvider: (_) {
+                              return Menu(
                                 children: [
-                                  Expanded(
-                                    child: Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                        item.imageUrl != null
-                                            ? Image.network(
-                                                widget.service
-                                                    .getImageUrl(item.imageUrl),
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Expanded(
-                                                child: Icon(Symbols.movie,
-                                                    size: 48),
-                                              ),
-                                        Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          right: 0,
-                                          bottom: 0,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  Colors.transparent,
-                                                  Colors.black87,
-                                                ],
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                              ),
-                                            ),
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          right: 0,
-                                          bottom: 0,
-                                          child: Center(
-                                            child: CircleAvatar(
-                                              backgroundColor: Colors.black54,
-                                              child: Icon(
-                                                  Symbols.play_arrow_rounded,
-                                                  color: Colors.white),
+                                  MenuAction(
+                                      image: MenuImage.icon(
+                                          Symbols.resume_rounded),
+                                      title: 'Resume Playing',
+                                      callback: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => VideoScreen(
+                                              itemId: item.id,
+                                              videoUrl: widget.service
+                                                  .getStreamUrl(item.id),
+                                              title: item.name,
+                                              service: widget.service,
                                             ),
                                           ),
-                                        ),
-                                        Positioned(
-                                          bottom: 40,
-                                          left: 20,
-                                          right: 20,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  item.name,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyMedium!
-                                                      .copyWith(
-                                                          color: Colors.white),
+                                        );
+                                      }),
+                                  MenuAction(
+                                      image: MenuImage.icon(Symbols.info),
+                                      title: 'Details',
+                                      callback: () {
+                                        showDetailScreen(isDesktop, item);
+                                      }),
+                                  MenuSeparator(),
+                                  Menu(
+                                    title: 'Actions',
+                                    children: [
+                                      MenuAction(
+                                        image: MenuImage.icon(Symbols.favorite),
+                                        title: 'Add to Favorites',
+                                        callback: () {
+                                          showComingSoon();
+                                        },
+                                      ),
+                                      MenuAction(
+                                          image: MenuImage.icon(
+                                              Symbols.watch_later_rounded),
+                                          title: 'Add to Watch Later',
+                                          callback: () {
+                                            showComingSoon();
+                                          }),
+                                      MenuAction(
+                                          image: MenuImage.icon(
+                                              Symbols.history_off_rounded),
+                                          title: 'Remove from history',
+                                          callback: () {
+                                            showComingSoon();
+                                          }),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                            child: Material(
+                              borderRadius: BorderRadius.circular(8.0),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () {
+                                  showDetailScreen(isDesktop, item);
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          item.imageUrl != null
+                                              ? Image.network(
+                                                  widget.service.getImageUrl(
+                                                      item.imageUrl),
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Expanded(
+                                                  child: Icon(Symbols.movie,
+                                                      size: 48),
+                                                ),
+                                          Positioned(
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.transparent,
+                                                    Colors.black87,
+                                                  ],
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
                                                 ),
                                               ),
-                                            ],
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                            ),
                                           ),
-                                        ),
-                                        Positioned(
-                                          bottom: 20,
-                                          left: 20,
-                                          right: 20,
-                                          child: LinearProgressIndicator(
-                                            value: item.playbackProgress,
-                                            minHeight: 4,
+                                          Positioned(
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            child: Center(
+                                              child: CircleAvatar(
+                                                backgroundColor: Colors.black54,
+                                                child: Icon(
+                                                    Symbols.play_arrow_rounded,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                                          Positioned(
+                                            bottom: 40,
+                                            left: 20,
+                                            right: 20,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    item.name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium!
+                                                        .copyWith(
+                                                            color:
+                                                                Colors.white),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 20,
+                                            left: 20,
+                                            right: 20,
+                                            child: LinearProgressIndicator(
+                                              value: item.playbackProgress,
+                                              minHeight: 4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -235,119 +306,150 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         itemSnapping: true,
                         enableSplash: false,
                         children: items.map((item) {
-                          return Material(
-                            borderRadius: BorderRadius.circular(8.0),
-                            clipBehavior: Clip.antiAlias,
-                            child: InkWell(
-                              onTap: () {
-                                if (isDesktop) {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    scrollControlDisabledMaxHeightRatio: 0.9,
-                                    constraints: BoxConstraints(
-                                        minWidth: 300, maxWidth: 1200),
-                                    clipBehavior: Clip.antiAlias,
-                                    builder: (context) => Center(
-                                      child: MovieDetailsScreen(
-                                        movie: item,
-                                        service: widget.service,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => MovieDetailsScreen(
-                                        movie: item,
-                                        service: widget.service,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          return ContextMenuWidget(
+                            menuProvider: (_) {
+                              return Menu(
                                 children: [
-                                  if (item.imageUrl != null)
-                                    Expanded(
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Image.network(
-                                            widget.service
-                                                .getImageUrl(item.imageUrl),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          Positioned(
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.transparent,
-                                                    Colors.black87,
-                                                  ],
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                ),
-                                              ),
-                                              width: double.infinity,
-                                              height: double.infinity,
+                                  MenuAction(
+                                      image: MenuImage.icon(
+                                          Symbols.play_arrow_rounded),
+                                      title: 'Play',
+                                      callback: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => VideoScreen(
+                                              itemId: item.id,
+                                              videoUrl: widget.service
+                                                  .getStreamUrl(item.id),
+                                              title: item.name,
+                                              service: widget.service,
                                             ),
                                           ),
-                                          Positioned(
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            child: Center(
-                                              child: CircleAvatar(
-                                                backgroundColor: Colors.black54,
-                                                child: Icon(
-                                                    Symbols.play_arrow_rounded,
-                                                    color: Colors.white),
-                                              ),
+                                        );
+                                      }),
+                                  MenuAction(
+                                      image: MenuImage.icon(Symbols.info),
+                                      title: 'Details',
+                                      callback: () {
+                                        showDetailScreen(isDesktop, item);
+                                      }),
+                                  MenuSeparator(),
+                                  Menu(
+                                    title: 'Actions',
+                                    children: [
+                                      MenuAction(
+                                        image: MenuImage.icon(Symbols.favorite),
+                                        title: 'Add to Favorites',
+                                        callback: () {
+                                          showComingSoon();
+                                        },
+                                      ),
+                                      MenuAction(
+                                          image: MenuImage.icon(
+                                              Symbols.watch_later_rounded),
+                                          title: 'Add to Watch Later',
+                                          callback: () {
+                                            showComingSoon();
+                                          }),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                            child: Material(
+                              borderRadius: BorderRadius.circular(8.0),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () {
+                                  showDetailScreen(isDesktop, item);
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (item.imageUrl != null)
+                                      Expanded(
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            Image.network(
+                                              widget.service
+                                                  .getImageUrl(item.imageUrl),
+                                              fit: BoxFit.cover,
                                             ),
-                                          ),
-                                          Positioned(
-                                            bottom: 20,
-                                            left: 20,
-                                            right: 20,
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    item.name,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium!
-                                                        .copyWith(
-                                                            color:
-                                                                Colors.white),
+                                            Positioned(
+                                              top: 0,
+                                              left: 0,
+                                              right: 0,
+                                              bottom: 0,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Colors.transparent,
+                                                      Colors.black87,
+                                                    ],
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.bottomCenter,
                                                   ),
                                                 ),
-                                              ],
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            Positioned(
+                                              top: 0,
+                                              left: 0,
+                                              right: 0,
+                                              bottom: 0,
+                                              child: Center(
+                                                child: CircleAvatar(
+                                                  backgroundColor:
+                                                      Colors.black54,
+                                                  child: Icon(
+                                                      Symbols
+                                                          .play_arrow_rounded,
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 20,
+                                              left: 20,
+                                              right: 20,
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      item.name,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyMedium!
+                                                          .copyWith(
+                                                              color:
+                                                                  Colors.white),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    else
+                                      const Expanded(
+                                        child: Icon(Symbols.movie, size: 48),
                                       ),
-                                    )
-                                  else
-                                    const Expanded(
-                                      child: Icon(Symbols.movie, size: 48),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -395,38 +497,67 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15)),
                         children: items.map((item) {
-                          return MovieCard(
-                            title: item.name,
-                            posterUrl: item.imageUrl != null
-                                ? widget.service.getImageUrl(item.imageUrl)
-                                : null,
-                            rating: item.rating,
-                            onTap: () {
-                              if (isDesktop) {
-                                showModalBottomSheet(
-                                  context: context,
-                                  scrollControlDisabledMaxHeightRatio: 0.9,
-                                  constraints: BoxConstraints(
-                                      minWidth: 300, maxWidth: 1200),
-                                  clipBehavior: Clip.antiAlias,
-                                  builder: (context) => Center(
-                                    child: MovieDetailsScreen(
-                                      movie: item,
-                                      service: widget.service,
-                                    ),
+                          return ContextMenuWidget(
+                            menuProvider: (_) {
+                              return Menu(
+                                children: [
+                                  MenuAction(
+                                      image: MenuImage.icon(
+                                          Symbols.play_arrow_rounded),
+                                      title: 'Play',
+                                      callback: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => VideoScreen(
+                                              itemId: item.id,
+                                              videoUrl: widget.service
+                                                  .getStreamUrl(item.id),
+                                              title: item.name,
+                                              service: widget.service,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                  MenuAction(
+                                      image: MenuImage.icon(Symbols.info),
+                                      title: 'Details',
+                                      callback: () {
+                                        showDetailScreen(isDesktop, item);
+                                      }),
+                                  MenuSeparator(),
+                                  Menu(
+                                    title: 'Actions',
+                                    children: [
+                                      MenuAction(
+                                        image: MenuImage.icon(Symbols.favorite),
+                                        title: 'Add to Favorites',
+                                        callback: () {
+                                          showComingSoon();
+                                        },
+                                      ),
+                                      MenuAction(
+                                          image: MenuImage.icon(
+                                              Symbols.watch_later_rounded),
+                                          title: 'Add to Watch Later',
+                                          callback: () {
+                                            showComingSoon();
+                                          }),
+                                    ],
                                   ),
-                                );
-                              } else {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailsScreen(
-                                      movie: item,
-                                      service: widget.service,
-                                    ),
-                                  ),
-                                );
-                              }
+                                ],
+                              );
                             },
+                            child: MovieCard(
+                              title: item.name,
+                              posterUrl: item.imageUrl != null
+                                  ? widget.service.getImageUrl(item.imageUrl)
+                                  : null,
+                              rating: item.rating,
+                              onTap: () {
+                                showDetailScreen(isDesktop, item);
+                              },
+                            ),
                           );
                         }).toList(),
                       ),
