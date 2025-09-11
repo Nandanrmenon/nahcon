@@ -115,6 +115,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                   .getStreamUrl(item.id),
                                               title: item.name,
                                               service: widget.service,
+                                              jellyfinItem: item,
                                             ),
                                           ),
                                         );
@@ -324,6 +325,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                   .getStreamUrl(item.id),
                                               title: item.name,
                                               service: widget.service,
+                                              jellyfinItem: item,
                                             ),
                                           ),
                                         );
@@ -515,6 +517,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                   .getStreamUrl(item.id),
                                               title: item.name,
                                               service: widget.service,
+                                              jellyfinItem: item,
                                             ),
                                           ),
                                         );

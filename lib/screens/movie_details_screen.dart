@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:nahcon/widgets/m_list.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -53,8 +54,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
 
     final poster = widget.movie.imageUrl != null
         ? Hero(
-            tag:
-                'movie-poster-desktop-${widget.movie.id}',
+            tag: 'movie-poster-desktop-${widget.movie.id}',
             child: CachedNetworkImage(
               imageUrl: widget.service.getImageUrl(widget.movie.imageUrl),
               fit: BoxFit.cover,
@@ -184,11 +184,62 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               .toList() ??
                           [],
                     ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        movieDetails.overview ?? 'No Description',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    MListHeader(title: 'Media Info'),
+                    ...?(movieDetails.mediaSources?.map((source) {
+                      final video = source.streams?.firstWhere(
+                        (s) => s.type == 'Video',
+                        orElse: () => MediaStream(),
+                      );
+
+                      final audio = source.streams?.firstWhere(
+                        (s) => s.type == 'Audio',
+                        orElse: () => MediaStream(),
+                      );
+
+                      final resolution =
+                          video?.width != null && video?.height != null
+                              ? "${video!.width}x${video.height}"
+                              : "Unknown res";
+
+                      final hdr = video?.videoRange ?? "SDR";
+                      final codec = video?.codec ?? "Unknown codec";
+                      final audioLang = audio?.language ?? "Unknown audio";
+
+                      return MListView(
+                        // spacing: 4.0,
+                        items: [
+                          MListItemData(
+                            title: codec,
+                            subtitle: 'Codec',
+                            onTap: () async {},
+                          ),
+                          MListItemData(
+                            title: audioLang,
+                            subtitle: 'Language',
+                            onTap: () async {},
+                          ),
+                          MListItemData(
+                            title: hdr,
+                            subtitle: 'Video',
+                            onTap: () async {},
+                          ),
+                        ],
+                      );
+                    })),
                   ],
-                ),
-                Text(
-                  movieDetails.overview ?? 'No Description',
-                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Text(
                   'More Like This',
@@ -354,6 +405,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                                       widget.movie.id),
                                               title: widget.movie.name,
                                               service: widget.service,
+                                              jellyfinItem: movieDetails,
                                             ),
                                           ),
                                         );
@@ -454,6 +506,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                                           .getStreamUrl(widget.movie.id),
                                       title: widget.movie.name,
                                       service: widget.service,
+                                      jellyfinItem: movieDetails,
                                     ),
                                   ),
                                 );

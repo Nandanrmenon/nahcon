@@ -293,6 +293,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                                       .getStreamUrl(episode.id),
                                                   title: episode.name,
                                                   service: widget.service,
+                                                  jellyfinItem: widget.series,
                                                 ),
                                               ),
                                             );
@@ -476,6 +477,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                                         widget.series.id),
                                                 title: widget.series.name,
                                                 service: widget.service,
+                                                jellyfinItem: widget.series,
                                               ),
                                             ),
                                           );

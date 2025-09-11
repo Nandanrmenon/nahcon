@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:nahcon/models/jellyfin_item.dart';
+import 'package:nahcon/widgets/video_player/info_chip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/jellyfin_service.dart';
@@ -14,6 +16,7 @@ class VideoScreen extends StatefulWidget {
   final String title;
   final JellyfinService service;
   final String itemId;
+  final JellyfinItem jellyfinItem;
 
   const VideoScreen({
     super.key,
@@ -21,6 +24,7 @@ class VideoScreen extends StatefulWidget {
     required this.title,
     required this.service,
     required this.itemId,
+    required this.jellyfinItem,
   });
 
   @override
@@ -265,6 +269,8 @@ class _VideoScreenState extends State<VideoScreen> {
     bool isDesktop = TargetPlatform.macOS == Theme.of(context).platform ||
         TargetPlatform.linux == Theme.of(context).platform ||
         TargetPlatform.windows == Theme.of(context).platform;
+    print(widget.jellyfinItem.mediaSources);
+
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.space): () {
@@ -294,8 +300,10 @@ class _VideoScreenState extends State<VideoScreen> {
           normal: MaterialVideoControlsThemeData(
             buttonBarButtonSize: 24.0,
             buttonBarButtonColor: Colors.white,
-            topButtonBarMargin:
-                EdgeInsets.only(bottom: 56, left: 48, right: 48),
+            topButtonBarMargin: EdgeInsets.only(
+                bottom: 56,
+                left: isDesktop ? 24 : 48,
+                right: isDesktop ? 24 : 48),
             topButtonBar: [
               IconButton(
                   color: Colors.white,
@@ -317,6 +325,35 @@ class _VideoScreenState extends State<VideoScreen> {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   )),
+              Spacer(),
+              ...?(widget.jellyfinItem.mediaSources?.map((source) {
+                final video = source.streams?.firstWhere(
+                  (s) => s.type == 'Video',
+                  orElse: () => MediaStream(),
+                );
+
+                final audio = source.streams?.firstWhere(
+                  (s) => s.type == 'Audio',
+                  orElse: () => MediaStream(),
+                );
+
+                final resolution = video?.width != null && video?.height != null
+                    ? "${video!.width}x${video.height}"
+                    : "Unknown res";
+
+                final hdr = video?.videoRange ?? "SDR";
+                final codec = video?.codec ?? "Unknown codec";
+                final audioLang = audio?.language ?? "Unknown audio";
+
+                return Row(
+                  spacing: 4.0,
+                  children: [
+                    VideoInfoChip(label: codec),
+                    VideoInfoChip(label: hdr),
+                    VideoInfoChip(label: audioLang),
+                  ],
+                );
+              })),
             ],
             shiftSubtitlesOnControlsVisibilityChange: isDesktop ? true : false,
             primaryButtonBar: [

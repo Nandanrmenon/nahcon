@@ -344,12 +344,16 @@ class JellyfinService {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/Users/$userId/Items/$itemId'),
+        Uri.parse(
+            '$baseUrl/Users/$userId/Items/$itemId?Fields=MediaSources,Overview,Genres,ProductionYear'),
         headers: {
           'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
           'X-Emby-Token': accessToken!,
         },
       );
+      final data = jsonDecode(response.body);
+      // print('response');
+      print(data);
 
       if (response.statusCode == 401) {
         final success = await tryAutoLogin();
