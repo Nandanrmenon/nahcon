@@ -24,15 +24,6 @@ ThemeData darkTheme({ColorScheme? dynamicScheme}) {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: scheme.surfaceContainerLow,
         contentTextStyle: TextStyle(color: scheme.onSurface)),
-    pageTransitionsTheme: PageTransitionsTheme(
-      builders: {
-        TargetPlatform.android: const PredictiveBackPageTransitionsBuilder(),
-        TargetPlatform.iOS: const PredictiveBackPageTransitionsBuilder(),
-        TargetPlatform.linux: const PredictiveBackPageTransitionsBuilder(),
-        TargetPlatform.macOS: const PredictiveBackPageTransitionsBuilder(),
-        TargetPlatform.windows: const PredictiveBackPageTransitionsBuilder(),
-      },
-    ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         shape:
