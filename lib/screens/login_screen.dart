@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/utils/constants.dart';
+import 'package:nahcon/widgets/app_logo.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 import '../services/jellyfin_service.dart';
 import 'app.dart';
@@ -20,11 +23,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _serverController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final FocusNode _usernameFocusNode = FocusNode();
   final _jellyfinService = JellyfinService();
 
   bool _isLoading = false;
   bool _serverValidated = false;
+  final FocusNode _usernameFocusNode = FocusNode();
+  late FocusNode _passwordFocusNode;
 
   List<Map<String, dynamic>> _profiles = [];
   String? _selectedServerForAddUser;
@@ -57,8 +61,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
-    super.initState();
     _loadProfiles();
+    _passwordFocusNode = FocusNode();
+    super.initState();
   }
 
   @override
@@ -78,12 +83,32 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _switchProfile(Map<String, dynamic> profile) async {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 16.0,
+            children: [
+              CircularProgressIndicator(),
+              Text('Switching to ${profile['username']}')
+            ],
+          ),
+        ),
+      ),
+    );
     await _jellyfinService.setCurrentProfile(profile['id']);
     final success = await _jellyfinService.tryAutoLogin();
     if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => App(service: _jellyfinService)),
-      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => App(service: _jellyfinService),
+          ),
+          (Route<dynamic> route) => false);
     }
   }
 
@@ -248,214 +273,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
-    final loginContent = CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          floating: false,
-          expandedHeight: _profiles.isNotEmpty ? 200 : 400.0,
-          backgroundColor: isDesktop
-              ? Theme.of(context).colorScheme.surface
-              : Theme.of(context).colorScheme.surfaceContainerLow,
-          elevation: 0,
-          leading: _showLoginForm
-              ? IconButton(
-                  icon: const Icon(Symbols.arrow_back),
-                  onPressed: _exitLoginMode,
-                )
-              : null,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 16,
-              children: [
-                SizedBox(
-                  height: 48,
-                  width: 48,
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: Image.asset('assets/nahCon.png')),
-                ),
-                Text(
-                  kAppName,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                ),
-              ],
-            ),
-            centerTitle: true,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                if (!_showLoginForm && _profiles.isNotEmpty)
-                  Column(
-                    children: [
-                      const ListTile(
-                        title: Text('Switch Profile'),
-                        subtitle: Text('Choose an existing user'),
-                      ),
-                      ..._uniqueServers.map((server) {
-                        final serverProfiles = _profiles
-                            .where((p) => p['serverUrl'] == server)
-                            .toList();
-                        return Column(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Symbols.dns),
-                              title: Text(server),
-                            ),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                ...serverProfiles.map((profile) {
-                                  return SizedBox(
-                                    width: 150,
-                                    height: 150,
-                                    child: Card.filled(
-                                      clipBehavior: Clip.antiAlias,
-                                      child: InkWell(
-                                        onTap: () => _switchProfile(profile),
-                                        onLongPress: () =>
-                                            _confirmAndDeleteProfile(profile),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            spacing: 16.0,
-                                            children: [
-                                              FutureBuilder<bool>(
-                                                future: _jellyfinService
-                                                    .hasUserImage(),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.hasData &&
-                                                      snapshot.data == true) {
-                                                    return CircleAvatar(
-                                                      radius: 20,
-                                                      backgroundImage: null,
-                                                      child: ClipOval(
-                                                        child:
-                                                            CachedNetworkImage(
-                                                          imageUrl: _jellyfinService
-                                                              .getUserImageUrl(),
-                                                          httpHeaders:
-                                                              _jellyfinService
-                                                                  .getVideoHeaders(),
-                                                          width: 40,
-                                                          height: 40,
-                                                          fit: BoxFit.cover,
-                                                          errorWidget: (context,
-                                                                  url, error) =>
-                                                              const Icon(
-                                                                  Icons
-                                                                      .account_circle,
-                                                                  size: 40),
-                                                          placeholder: (context,
-                                                                  url) =>
-                                                              const Icon(
-                                                                  Icons
-                                                                      .account_circle,
-                                                                  size: 40),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                  return const Icon(
-                                                      Symbols.account_circle,
-                                                      size: 40);
-                                                },
-                                              ),
-                                              Column(
-                                                spacing: 4.0,
-                                                children: [
-                                                  Text(profile['username']),
-                                                  Text(
-                                                    profile['serverName'] ??
-                                                        profile['serverUrl'],
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodySmall,
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }),
-                                SizedBox(
-                                  width: 150,
-                                  height: 150,
-                                  child: Card(
-                                    clipBehavior: Clip.antiAlias,
-                                    child: InkWell(
-                                      onTap: () =>
-                                          _enterLoginMode(server: server),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                              Symbols.add,
-                                              size: 48,
-                                            ),
-                                            Text(
-                                              'Add user to this server',
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      }),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: FilledButton.tonal(
-                                  onPressed: () => _enterLoginMode(),
-                                  child: Text('New Server'),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                if (_showLoginForm || _profiles.isEmpty) _buildLoginForm(),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-
     return Scaffold(
       body: isDesktop
           ? Center(
@@ -463,25 +280,324 @@ class _LoginScreenState extends State<LoginScreen> {
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: loginContent,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 16,
+                        children: [
+                          AppLogo(
+                            height: 48,
+                            width: 48,
+                            borderRadius: 16,
+                          ),
+                          Text(
+                            kAppName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                          )
+                              .animate()
+                              .moveY(
+                                  begin: -10.0,
+                                  duration: Duration(milliseconds: 500))
+                              .fadeIn(
+                                  begin: 0.0,
+                                  duration: Duration(milliseconds: 1000)),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 24,
+                      ),
+                      if (_showLoginForm)
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Symbols.arrow_back),
+                              onPressed: _exitLoginMode,
+                            ),
+                          ],
+                        ),
+                      if (!_showLoginForm && _profiles.isNotEmpty)
+                        _buildSwitchUser()
+                            .animate()
+                            .moveY(
+                                begin: 30.0,
+                                duration: Duration(milliseconds: 500))
+                            .fadeIn(
+                                begin: 0.0,
+                                duration: Duration(milliseconds: 800)),
+                      if (_showLoginForm || _profiles.isEmpty)
+                        _buildLoginForm(isDesktop)
+                            .animate()
+                            .moveY(
+                                begin: 30.0,
+                                duration: Duration(milliseconds: 500))
+                            .fadeIn(
+                                begin: 0.0,
+                                duration: Duration(milliseconds: 800)),
+                    ],
+                  ),
                 ),
               ),
             )
-          : loginContent,
+          : CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: _profiles.isNotEmpty ? 200 : 400.0,
+                  backgroundColor: isDesktop
+                      ? Theme.of(context).colorScheme.surface
+                      : Theme.of(context).colorScheme.surfaceContainerLow,
+                  elevation: 0,
+                  leading: _showLoginForm
+                      ? IconButton(
+                          icon: const Icon(Symbols.arrow_back),
+                          onPressed: _exitLoginMode,
+                        )
+                      : null,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 16.0),
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 16,
+                      children: [
+                        AppLogo(
+                          height: 48,
+                          width: 48,
+                          borderRadius: 16,
+                        ),
+                        Text(
+                          kAppName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        )
+                            .animate()
+                            .moveY(
+                                begin: -10.0,
+                                duration: Duration(milliseconds: 500))
+                            .fadeIn(
+                                begin: 0.0,
+                                duration: Duration(milliseconds: 1000)),
+                      ],
+                    ),
+                    centerTitle: true,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        if (!_showLoginForm && _profiles.isNotEmpty)
+                          _buildSwitchUser(),
+                        if (_showLoginForm || _profiles.isEmpty)
+                          _buildLoginForm(isDesktop),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildSwitchUser() {
+    return Column(
+      children: [
+        Column(
+          spacing: 4.0,
+          children: [
+            Text(
+              'Switch Profile',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              'Choose an existing user',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ],
+        ),
+        ..._uniqueServers.map((server) {
+          final serverProfiles =
+              _profiles.where((p) => p['serverUrl'] == server).toList();
+          return Column(
+            children: [
+              ListTile(
+                leading: const Icon(Symbols.dns),
+                title: Text(server),
+              ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  ...serverProfiles.map((profile) {
+                    return SizedBox(
+                      width: 150,
+                      height: 150,
+                      child: ContextMenuWidget(
+                        menuProvider: (_) {
+                          return Menu(
+                            children: [
+                              MenuAction(
+                                  image: MenuImage.icon(
+                                      Symbols.compare_arrows_rounded),
+                                  title: 'Switch to ${profile['username']}',
+                                  callback: () {
+                                    _confirmAndDeleteProfile(profile);
+                                  }),
+                              MenuSeparator(),
+                              MenuAction(
+                                  image: MenuImage.icon(Symbols.delete),
+                                  title: 'Delete',
+                                  callback: () {
+                                    _confirmAndDeleteProfile(profile);
+                                  }),
+                            ],
+                          );
+                        },
+                        child: Card.filled(
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _switchProfile(profile),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 16.0,
+                                children: [
+                                  FutureBuilder<bool>(
+                                    future: _jellyfinService.hasUserImage(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData &&
+                                          snapshot.data == true) {
+                                        return CircleAvatar(
+                                          radius: 20,
+                                          backgroundImage: null,
+                                          child: ClipOval(
+                                            child: CachedNetworkImage(
+                                              imageUrl: _jellyfinService
+                                                  .getUserImageUrl(),
+                                              httpHeaders: _jellyfinService
+                                                  .getVideoHeaders(),
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(
+                                                          Icons.account_circle,
+                                                          size: 40),
+                                              placeholder: (context, url) =>
+                                                  const Icon(
+                                                      Icons.account_circle,
+                                                      size: 40),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return const Icon(Symbols.account_circle,
+                                          size: 40);
+                                    },
+                                  ),
+                                  Column(
+                                    spacing: 4.0,
+                                    children: [
+                                      Text(profile['username']),
+                                      Text(
+                                        profile['serverName'] ??
+                                            profile['serverUrl'],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => _enterLoginMode(server: server),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Symbols.add,
+                                size: 48,
+                              ),
+                              Text(
+                                'Add user to this server',
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: () => _enterLoginMode(),
+                    child: Text('New Server'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildLoginForm(dynamic isDesktop) {
     return Form(
       key: _formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Login to Jellyfin',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          if (isDesktop)
+            Text(
+              'Login to Jellyfin',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
           const SizedBox(height: 16),
           if (!_serverValidated)
             TextFormField(
@@ -498,6 +614,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
                 return null;
               },
+              onFieldSubmitted: (value) => _validateServer,
               enabled: !_isLoading && !_serverValidated,
             ),
           if (_serverValidated) ...[
@@ -515,7 +632,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextFormField(
               controller: _usernameController,
-              focusNode: _usernameFocusNode, // Attach FocusNode here
+              focusNode: _usernameFocusNode,
+              onFieldSubmitted: (value) {
+                _passwordFocusNode.requestFocus();
+              },
               decoration: const InputDecoration(
                   labelText: 'Username',
                   prefixIcon: Icon(Symbols.person_rounded)),
@@ -528,6 +648,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              focusNode: _passwordFocusNode,
               controller: _passwordController,
               decoration: const InputDecoration(
                   labelText: 'Password',
@@ -536,6 +657,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.visiblePassword,
               // validator: (value) =>
               //     value?.isEmpty ?? true ? 'Please enter password' : null,
+              onFieldSubmitted: (value) => _login(),
               enabled: !_isLoading,
             ),
           ],
