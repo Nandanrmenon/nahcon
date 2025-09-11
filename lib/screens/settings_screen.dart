@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
-import 'package:nahcon/utils/constants.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,12 +16,14 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width < 400 ||
-        MediaQuery.of(context).size.width > 1000;
+    final isDesktop = UniversalPlatform.isDesktop
+        ? (MediaQuery.of(context).size.width < 400 ||
+            MediaQuery.of(context).size.width > 1000)
+        : MediaQuery.of(context).size.width > 400;
 
-    Future<void> _launchUrl(Uri _url) async {
-      if (!await launchUrl(_url)) {
-        throw Exception('Could not launch $_url');
+    Future<void> openUrl(Uri url) async {
+      if (!await launchUrl(url)) {
+        throw Exception('Could not launch $url');
       }
     }
 
@@ -34,7 +35,7 @@ class SettingsScreen extends StatelessWidget {
               'For better experience, use the ${isDesktop ? 'desktop' : 'mobile'} app',
           leading: Icon(Symbols.download),
           onTap: () async {
-            await _launchUrl(
+            await openUrl(
                 Uri.parse('https://github.com/Nandanrmenon/nahcon/releases'));
           },
         ),
@@ -43,8 +44,7 @@ class SettingsScreen extends StatelessWidget {
         subtitle: 'Check out the source code',
         leading: Icon(Symbols.code),
         onTap: () async {
-          await _launchUrl(
-              Uri.parse('https://github.com/Nandanrmenon/nahcon/'));
+          await openUrl(Uri.parse('https://github.com/Nandanrmenon/nahcon/'));
         },
       ),
       ListItemData(
@@ -52,7 +52,7 @@ class SettingsScreen extends StatelessWidget {
         subtitle: '',
         leading: Icon(Symbols.report_problem),
         onTap: () async {
-          await _launchUrl(
+          await openUrl(
               Uri.parse('https://github.com/Nandanrmenon/nahcon/issues'));
         },
       ),
@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
         subtitle: 'Buy me a coffee',
         leading: Icon(Symbols.money),
         onTap: () async {
-          await _launchUrl(Uri.parse('https://ko-fi.com/P5P41KEC9N'));
+          await openUrl(Uri.parse('https://ko-fi.com/P5P41KEC9N'));
         },
       ),
       ListItemData(
@@ -385,7 +385,7 @@ class SettingsScreen extends StatelessWidget {
       physics: NeverScrollableScrollPhysics(),
       itemCount: items.length,
       itemBuilder: (context, index) {
-        bool _isLastItem(int index) {
+        bool isLastItem(int index) {
           if (UniversalPlatform.isWeb) {
             return index == items.length - 1;
           } else {
@@ -397,10 +397,10 @@ class SettingsScreen extends StatelessWidget {
           borderRadius: BorderRadius.only(
             topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
             topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
-            bottomLeft: _isLastItem(index)
+            bottomLeft: isLastItem(index)
                 ? const Radius.circular(16.0)
                 : const Radius.circular(4.0),
-            bottomRight: _isLastItem(index)
+            bottomRight: isLastItem(index)
                 ? const Radius.circular(16.0)
                 : const Radius.circular(4.0),
           ),
