@@ -456,7 +456,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Symbols.compare_arrows_rounded),
                                   title: 'Switch to ${profile['username']}',
                                   callback: () {
-                                    _confirmAndDeleteProfile(profile);
+                                    _switchProfile(profile);
                                   }),
                               MenuSeparator(),
                               MenuAction(
