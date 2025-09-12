@@ -343,14 +343,14 @@ class _VideoScreenState extends State<VideoScreen> {
 
                 final hdr = video?.videoRange ?? "SDR";
                 final codec = video?.codec ?? "Unknown codec";
-                final audioLang = audio?.language ?? "Unknown audio";
-
+                final displayTitle =
+                    video?.displayTitle?.split(' ').first ?? "Unknown";
                 return Row(
                   spacing: 4.0,
                   children: [
                     VideoInfoChip(label: codec),
                     VideoInfoChip(label: hdr),
-                    VideoInfoChip(label: audioLang),
+                    VideoInfoChip(label: displayTitle),
                   ],
                 );
               })),

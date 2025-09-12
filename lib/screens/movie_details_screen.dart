@@ -217,22 +217,29 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                       final hdr = video?.videoRange ?? "SDR";
                       final codec = video?.codec ?? "Unknown codec";
                       final audioLang = audio?.language ?? "Unknown audio";
+                      final displayTitle =
+                          video?.displayTitle?.split(' ').first ?? "Unknown";
 
                       return MListView(
                         // spacing: 4.0,
                         items: [
                           MListItemData(
-                            title: codec,
+                            title: displayTitle.toUpperCase(),
+                            subtitle: 'Resolution',
+                            onTap: () async {},
+                          ),
+                          MListItemData(
+                            title: codec.toUpperCase(),
                             subtitle: 'Codec',
                             onTap: () async {},
                           ),
                           MListItemData(
-                            title: audioLang,
+                            title: audioLang.toUpperCase(),
                             subtitle: 'Language',
                             onTap: () async {},
                           ),
                           MListItemData(
-                            title: hdr,
+                            title: hdr.toUpperCase(),
                             subtitle: 'Video',
                             onTap: () async {},
                           ),

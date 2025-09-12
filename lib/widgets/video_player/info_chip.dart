@@ -14,7 +14,7 @@ class VideoInfoChip extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          label,
+          label.toUpperCase(),
           style: Theme.of(context).textTheme.labelSmall,
         ),
       ),
