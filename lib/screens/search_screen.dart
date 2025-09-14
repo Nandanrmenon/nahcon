@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
+import 'package:nahcon/screens/video_screen.dart';
 import 'package:nahcon/utils/responsive_grid.dart';
 
 import '../models/jellyfin_item.dart';
@@ -105,7 +106,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                             itemCount: _results!.length,
                             itemBuilder: (context, index) {
-                              final isDesktop = ResponsiveGrid.isDesktop(constraints);
+                              final isDesktop =
+                                  ResponsiveGrid.isDesktop(constraints);
                               final item = _results![index];
                               return MovieCard(
                                 title: item.name,
@@ -117,7 +119,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                     showModalBottomSheet(
                                       context: context,
                                       scrollControlDisabledMaxHeightRatio: 0.9,
-                                      constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                      constraints: BoxConstraints(
+                                          minWidth: 300, maxWidth: 1200),
                                       clipBehavior: Clip.antiAlias,
                                       builder: (context) => Center(
                                         child: MovieDetailsScreen(
@@ -129,13 +132,29 @@ class _SearchScreenState extends State<SearchScreen> {
                                   } else {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => MovieDetailsScreen(
+                                        builder: (context) =>
+                                            MovieDetailsScreen(
                                           movie: item,
                                           service: widget.service,
                                         ),
                                       ),
                                     );
                                   }
+                                },
+                                onPlay: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VideoScreen(
+                                        itemId: item.id,
+                                        videoUrl: widget.service
+                                            .getStreamUrl(item.id),
+                                        title: item.name,
+                                        service: widget.service,
+                                        jellyfinItem: item,
+                                      ),
+                                    ),
+                                  );
                                 },
                               );
                             },

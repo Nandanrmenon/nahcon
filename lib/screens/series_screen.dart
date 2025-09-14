@@ -140,6 +140,21 @@ class _SeriesScreenState extends State<SeriesScreen> {
                                 );
                               }
                             },
+                            // onPlay: () {
+                            //   Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (context) => VideoScreen(
+                            //         itemId: series.id,
+                            //         videoUrl:
+                            //             widget.service.getStreamUrl(series.id),
+                            //         title: series.name,
+                            //         service: widget.service,
+                            //         jellyfinItem: series,
+                            //       ),
+                            //     ),
+                            //   );
+                            // },
                           );
                         },
                       );

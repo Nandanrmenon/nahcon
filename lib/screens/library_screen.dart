@@ -490,7 +490,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   final items = snapshot.data!;
                   return SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 300,
+                      height: 380,
                       child: CarouselView(
                         itemExtent: 200,
                         shrinkExtent: 0.8,
@@ -557,6 +557,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   ? widget.service.getImageUrl(item.imageUrl)
                                   : null,
                               rating: item.rating,
+                              onPlay: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoScreen(
+                                      itemId: item.id,
+                                      videoUrl:
+                                          widget.service.getStreamUrl(item.id),
+                                      title: item.name,
+                                      service: widget.service,
+                                      jellyfinItem: item,
+                                    ),
+                                  ),
+                                );
+                              },
                               onTap: () {
                                 showDetailScreen(isDesktop, item);
                               },

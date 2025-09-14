@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/widgets/m_list.dart';
+import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -265,51 +266,69 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           final movie = snapshot.data![index];
-                          return Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(right: 8),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailsScreen(
-                                      movie: movie,
-                                      service: widget.service,
-                                    ),
+                          // return Container(
+                          //   width: 120,
+                          //   margin: const EdgeInsets.only(right: 8),
+                          //   child: InkWell(
+                          //     onTap: () {
+                          //       Navigator.push(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //           builder: (context) => MovieDetailsScreen(
+                          //             movie: movie,
+                          //             service: widget.service,
+                          //           ),
+                          //         ),
+                          //       );
+                          //     },
+                          //     child: Column(
+                          //       crossAxisAlignment: CrossAxisAlignment.start,
+                          //       children: [
+                          //         if (movie.imageUrl != null)
+                          //           Expanded(
+                          //             child: ClipRRect(
+                          //               borderRadius: BorderRadius.circular(8),
+                          //               child: Image.network(
+                          //                 widget.service
+                          //                     .getImageUrl(movie.imageUrl),
+                          //                 fit: BoxFit.cover,
+                          //                 width: double.infinity,
+                          //                 height: 250,
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         Padding(
+                          //           padding: const EdgeInsets.all(8.0),
+                          //           child: Text(
+                          //             movie.name,
+                          //             maxLines: 1,
+                          //             overflow: TextOverflow.ellipsis,
+                          //             style: Theme.of(context)
+                          //                 .textTheme
+                          //                 .bodyMedium,
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // );
+                          return MovieCard(
+                            title: movie.name,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MovieDetailsScreen(
+                                    movie: movie,
+                                    service: widget.service,
                                   ),
-                                );
-                              },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (movie.imageUrl != null)
-                                    Expanded(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          widget.service
-                                              .getImageUrl(movie.imageUrl),
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: 250,
-                                        ),
-                                      ),
-                                    ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      movie.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            },
+                            posterUrl: movie.imageUrl != null
+                                ? widget.service.getImageUrl(movie.imageUrl)
+                                : null,
+                            rating: movie.rating,
                           );
                         },
                       );

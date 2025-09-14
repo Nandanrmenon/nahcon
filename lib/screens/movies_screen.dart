@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
+import 'package:nahcon/screens/video_screen.dart';
 import 'package:nahcon/widgets/movie_card.dart';
 
 import '../models/jellyfin_item.dart';
@@ -77,8 +78,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                 builder: (context, constraints) {
                   final isDesktop = ResponsiveGrid.isDesktop(constraints);
                   return FutureBuilder<List<JellyfinItem>>(
-                    key: ValueKey(
-                        selectedGenre),
+                    key: ValueKey(selectedGenre),
                     future: widget.service.getAllMovies(genreId: selectedGenre),
                     builder: (context, snapshot) {
                       if (_isLoading && !snapshot.hasData) {
@@ -116,7 +116,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                 showModalBottomSheet(
                                   context: context,
                                   scrollControlDisabledMaxHeightRatio: 0.9,
-                                  constraints: BoxConstraints(minWidth: 300, maxWidth: 1200),
+                                  constraints: BoxConstraints(
+                                      minWidth: 300, maxWidth: 1200),
                                   clipBehavior: Clip.antiAlias,
                                   builder: (context) => Center(
                                     child: MovieDetailsScreen(
@@ -135,6 +136,21 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                   ),
                                 );
                               }
+                            },
+                            onPlay: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoScreen(
+                                    itemId: movie.id,
+                                    videoUrl:
+                                        widget.service.getStreamUrl(movie.id),
+                                    title: movie.name,
+                                    service: widget.service,
+                                    jellyfinItem: movie,
+                                  ),
+                                ),
+                              );
                             },
                             rating: movie.rating,
                             posterUrl: movie.imageUrl != null
