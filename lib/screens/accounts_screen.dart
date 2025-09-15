@@ -239,7 +239,12 @@ class AccountsScreen extends StatelessWidget {
                 ),
               );
             }
-            return const Icon(Symbols.account_circle, size: 40);
+            return CircleAvatar(
+                radius: 50,
+                child: const Icon(
+                  Symbols.account_circle,
+                  size: 50,
+                ));
           },
         ),
         Expanded(
