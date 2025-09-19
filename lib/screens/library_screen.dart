@@ -90,11 +90,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         itemSnapping: true,
                         enableSplash: false,
                         flexWeights: [
-                          isDesktop ? 10 : 4,
-                          isDesktop ? 8 : 1,
-                          if (isDesktop) 6,
-                          if (isDesktop) 4,
-                          if (isDesktop) 2,
+                          6,
+                          1
+                          // isDesktop ? 10 : 4,
+                          // isDesktop ? 8 : 1,
+                          // if (isDesktop) 6,
+                          // if (isDesktop) 4,
+                          // if (isDesktop) 2,
                         ],
                         children: items.map((item) {
                           return ContextMenuWidget(

@@ -693,4 +693,71 @@ class JellyfinService {
       body: jsonEncode(body),
     );
   }
+
+  // Set Favorites
+  Future<void> setFavorite(String itemId, bool isFavorite) async {
+    if (userId == null || accessToken == null || baseUrl == null) {
+      print('[setFavorite] Not authenticated');
+      throw Exception('Not authenticated');
+    }
+
+    final url = '$baseUrl/UserFavoriteItems/$itemId';
+    print('[setFavorite] itemId: $itemId, isFavorite: $isFavorite, url: $url');
+
+    http.Response response;
+    if (isFavorite) {
+      print('[setFavorite] Sending POST to add favorite');
+      response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+          'X-Emby-Token': accessToken!,
+        },
+      );
+    } else {
+      print('[setFavorite] Sending DELETE to remove favorite');
+      response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+          'X-Emby-Token': accessToken!,
+        },
+      );
+    }
+
+    print('[setFavorite] Response status: ${response.statusCode}');
+    print('[setFavorite] Response body: ${response.body}');
+
+    if (response.statusCode != 200) {
+      print(
+          '[setFavorite] ERROR: Failed to ${isFavorite ? 'add to' : 'remove from'} favorites: ${response.statusCode}');
+      throw Exception(
+          'Failed to ${isFavorite ? 'add to' : 'remove from'} favorites: '
+          '${response.statusCode}');
+    }
+  }
+
+  // Get Favorites
+  Future<List<JellyfinItem>> getFavorites() async {
+    if (userId == null || accessToken == null || baseUrl == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.get(
+      Uri.parse(
+          '$baseUrl/Users/$userId/Items?Filters=IsFavorite&Recursive=true'),
+      headers: {
+        'X-Emby-Authorization': _defaultHeaders['x-emby-authorization']!,
+        'X-Emby-Token': accessToken!,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return (data['Items'] as List)
+          .map((item) => JellyfinItem.fromJson(item))
+          .toList();
+    }
+    throw Exception('Failed to load favorites: ${response.statusCode}');
+  }
 }

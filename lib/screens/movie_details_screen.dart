@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/widgets/m_list.dart';
-import 'package:nahcon/widgets/movie_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/jellyfin_item.dart';
 import '../services/jellyfin_service.dart';
@@ -28,6 +28,8 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
   late Future<JellyfinItem> _movieDetailsFuture;
   JellyfinItem? _cachedDetails;
 
+  bool isFavorite = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
     try {
       final details = await widget.service.getItemDetails(widget.movie.id);
       _cachedDetails = details;
+      isFavorite = widget.movie.isFavorite;
       return details;
     } catch (e) {
       if (await widget.service.tryAutoLogin()) {
@@ -103,6 +106,8 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
               child: Text('No movie details available'),
             );
           }
+          // Always sync isFavorite with latest movieDetails
+          isFavorite = movieDetails.isFavorite;
 
           final content = Padding(
             padding: const EdgeInsets.all(16.0),
@@ -266,70 +271,70 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           final movie = snapshot.data![index];
-                          // return Container(
-                          //   width: 120,
-                          //   margin: const EdgeInsets.only(right: 8),
-                          //   child: InkWell(
-                          //     onTap: () {
-                          //       Navigator.push(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //           builder: (context) => MovieDetailsScreen(
-                          //             movie: movie,
-                          //             service: widget.service,
-                          //           ),
-                          //         ),
-                          //       );
-                          //     },
-                          //     child: Column(
-                          //       crossAxisAlignment: CrossAxisAlignment.start,
-                          //       children: [
-                          //         if (movie.imageUrl != null)
-                          //           Expanded(
-                          //             child: ClipRRect(
-                          //               borderRadius: BorderRadius.circular(8),
-                          //               child: Image.network(
-                          //                 widget.service
-                          //                     .getImageUrl(movie.imageUrl),
-                          //                 fit: BoxFit.cover,
-                          //                 width: double.infinity,
-                          //                 height: 250,
-                          //               ),
-                          //             ),
-                          //           ),
-                          //         Padding(
-                          //           padding: const EdgeInsets.all(8.0),
-                          //           child: Text(
-                          //             movie.name,
-                          //             maxLines: 1,
-                          //             overflow: TextOverflow.ellipsis,
-                          //             style: Theme.of(context)
-                          //                 .textTheme
-                          //                 .bodyMedium,
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // );
-                          return MovieCard(
-                            title: movie.name,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MovieDetailsScreen(
-                                    movie: movie,
-                                    service: widget.service,
+                          return Container(
+                            width: 160,
+                            margin: const EdgeInsets.only(right: 8),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MovieDetailsScreen(
+                                      movie: movie,
+                                      service: widget.service,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            posterUrl: movie.imageUrl != null
-                                ? widget.service.getImageUrl(movie.imageUrl)
-                                : null,
-                            rating: movie.rating,
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (movie.imageUrl != null)
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget.service
+                                              .getImageUrl(movie.imageUrl),
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: 250,
+                                        ),
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      movie.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
+                          // return MovieCard(
+                          //   title: movie.name,
+                          //   onTap: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //         builder: (context) => MovieDetailsScreen(
+                          //           movie: movie,
+                          //           service: widget.service,
+                          //         ),
+                          //       ),
+                          //     );
+                          //   },
+                          //   posterUrl: movie.imageUrl != null
+                          //       ? widget.service.getImageUrl(movie.imageUrl)
+                          //       : null,
+                          //   rating: movie.rating,
+                          // );
                         },
                       );
                     },
@@ -540,6 +545,35 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               icon: const Icon(Symbols.play_arrow),
                               label: const Text('Play'),
                             ),
+                          ),
+                        ),
+                        IconButton.filled(
+                          onPressed: () async {
+                            final newFavorite = !movieDetails.isFavorite;
+                            try {
+                              await widget.service
+                                  .setFavorite(movieDetails.id, newFavorite);
+                              // Clear cached item details so next fetch is fresh
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs
+                                  .remove('item_details_${movieDetails.id}');
+                              setState(() {
+                                isFavorite = newFavorite;
+                                _movieDetailsFuture = widget.service
+                                    .getItemDetails(widget.movie.id);
+                              });
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Failed to update favorite: $e')),
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            Symbols.favorite,
+                            fill: isFavorite ? 1 : 0,
                           ),
                         ),
                         Tooltip(

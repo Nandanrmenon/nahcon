@@ -9,6 +9,7 @@ class JellyfinItem {
   final String? officialRating;
   final List<String>? genres;
   final int? year;
+  final bool isFavorite;
 
   final int? runTimeTicks;
   final int? playbackPositionTicks;
@@ -28,6 +29,7 @@ class JellyfinItem {
     this.runTimeTicks,
     this.playbackPositionTicks,
     this.mediaSources,
+    this.isFavorite = false,
   });
 
   factory JellyfinItem.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class JellyfinItem {
       mediaSources: (json['MediaSources'] as List?)
           ?.map((s) => MediaSource.fromJson(s))
           .toList(),
+      isFavorite: json['UserData']?['IsFavorite'] ?? false,
     );
   }
 
