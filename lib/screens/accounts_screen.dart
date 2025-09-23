@@ -19,8 +19,8 @@ class AccountsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = UniversalPlatform.isDesktop
-        ? (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.width > 1000)
+        ? (MediaQuery.of(context).size.width < 200 ||
+            MediaQuery.of(context).size.width > 1200)
         : MediaQuery.of(context).size.width > 600;
 
     Future<void> openUrl(Uri url) async {
