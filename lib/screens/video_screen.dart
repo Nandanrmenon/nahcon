@@ -33,7 +33,12 @@ class VideoScreen extends StatefulWidget {
 
 class _VideoScreenState extends State<VideoScreen> {
   late final player = Player();
-  late final controller;
+  late final controller = VideoController(
+    player,
+    configuration: VideoControllerConfiguration(
+      enableHardwareAcceleration: enableHW,
+    ),
+  );
 
   AudioTrack? _selectedAudio;
   VideoTrack? _selectedVideo;
@@ -74,12 +79,6 @@ class _VideoScreenState extends State<VideoScreen> {
     setState(() {
       enableHW = pref.getBool("is_hw_enabled") ?? true;
     });
-    controller = VideoController(
-      player,
-      configuration: VideoControllerConfiguration(
-        enableHardwareAcceleration: enableHW,
-      ),
-    );
   }
 
   @override
@@ -370,28 +369,28 @@ class _VideoScreenState extends State<VideoScreen> {
               SizedBox(
                 width: 32,
               ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) =>
-                    ScaleTransition(scale: animation, child: child),
-                child: IconButton.filledTonal(
-                  key: ValueKey<bool>(player.state.playing),
-                  onPressed: () {
-                    setState(() {
-                      player.playOrPause();
-                    });
-                    _saveProgress(isPaused: !player.state.playing);
-                  },
-                  icon: StreamBuilder(
-                    stream: controller.player.stream.playing,
-                    builder: (context, playing) => Icon(
-                      playing.data == true ? Symbols.pause : Symbols.play_arrow,
+              StreamBuilder<bool?>(
+                stream: controller.player.stream.playing,
+                builder: (context, playingSnapshot) {
+                  final isPlaying = playingSnapshot.hasData
+                      ? (playingSnapshot.data == true)
+                      : player.state.playing;
+                  return IconButton.filledTonal(
+                    key: ValueKey<bool>(isPlaying),
+                    onPressed: () {
+                      setState(() {
+                        player.playOrPause();
+                      });
+                      _saveProgress(isPaused: !player.state.playing);
+                    },
+                    icon: Icon(
+                      isPlaying ? Symbols.pause : Symbols.play_arrow,
                       color: Colors.white,
                       size: isDesktop ? 48 : 32,
                     ),
-                  ),
-                  tooltip: player.state.playing ? 'Pause' : 'Play',
-                ),
+                    tooltip: isPlaying ? 'Pause' : 'Play',
+                  );
+                },
               ),
               SizedBox(
                 width: 32,
