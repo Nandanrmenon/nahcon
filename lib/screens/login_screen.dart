@@ -31,7 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
   late FocusNode _passwordFocusNode;
 
   List<Map<String, dynamic>> _profiles = [];
-  String? _selectedServerForAddUser;
 
   bool _showLoginForm = false;
 
@@ -177,72 +176,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // Helper to get unique servers from profiles
   List<String> get _uniqueServers =>
       _profiles.map((p) => p['serverUrl'] as String).toSet().toList();
-
-  void _showAddUserDialog() async {
-    final servers = _uniqueServers;
-    String? selectedServer;
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Select Server'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (servers.isNotEmpty)
-                DropdownButtonFormField<String>(
-                  initialValue: selectedServer,
-                  hint: const Text('Choose existing server'),
-                  items: servers
-                      .map((s) => DropdownMenuItem(
-                            value: s,
-                            child: Text(s),
-                          ))
-                      .toList(),
-                  onChanged: (val) {
-                    selectedServer = val;
-                  },
-                ),
-              const Divider(),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Or enter new server URL',
-                ),
-                onChanged: (val) {
-                  selectedServer = val;
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedServer != null && selectedServer!.isNotEmpty) {
-                  setState(() {
-                    _selectedServerForAddUser = selectedServer;
-                    _serverController.text = selectedServer!;
-                    _serverValidated = servers.contains(selectedServer);
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Continue'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (_selectedServerForAddUser != null) {
-      FocusScope.of(context).requestFocus(_usernameFocusNode);
-    }
-  }
 
   Future<void> _confirmAndDeleteProfile(Map<String, dynamic> profile) async {
     final confirmed = await showDialog<bool>(

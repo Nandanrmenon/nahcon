@@ -182,9 +182,6 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
     }
 
     Widget buildSearch() {
-      final isDesktop = MediaQuery.of(context).size.width < 400 ||
-          MediaQuery.of(context).size.width > 1000;
-
       return SizedBox(
         child: SearchAnchor(
           shrinkWrap: false,
@@ -239,7 +236,6 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) {
-                                        print('Error loading image: $error');
                                         return const Icon(Symbols.movie);
                                       },
                                     ),
@@ -343,7 +339,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
           );
   }
 
-  Future<void> _showProfileSwitcher(isDesktop) async {
+  Future<void> _showProfileSwitcher(bool isDesktop) async {
     final profiles = await widget.service.getProfiles();
     if (!mounted) return;
 
