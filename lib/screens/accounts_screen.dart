@@ -4,6 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/login_screen.dart';
 import 'package:nahcon/screens/settings_screen.dart';
 import 'package:nahcon/widgets/m_list.dart';
+import 'package:nahcon/widgets/movie_card.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -296,92 +297,29 @@ class AccountsScreen extends StatelessWidget {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final items = snapshot.data!;
           return SizedBox(
-            height: 300,
+            height: 380,
             child: CarouselView(
-              itemExtent: 180,
+              itemExtent: 200,
               shrinkExtent: 0.8,
+              itemSnapping: true,
               enableSplash: false,
               children: items.map((item) {
-                return Material(
-                  borderRadius: BorderRadius.circular(8.0),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MovieDetailsScreen(
-                            movie: item,
-                            service: service,
-                          ),
+                
+                return MovieCard(
+                  title: item.name,
+                  posterUrl: item.imageUrl != null
+                      ? service.getImageUrl(item.imageUrl)
+                      : null,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => MovieDetailsScreen(
+                          movie: item,
+                          service: service,
                         ),
-                      );
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (item.imageUrl != null)
-                          Expanded(
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  service.getImageUrl(item.imageUrl),
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.transparent,
-                                          Colors.black87,
-                                        ],
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                      ),
-                                    ),
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 20,
-                                  left: 20,
-                                  right: 20,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .copyWith(color: Colors.white),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          const Expanded(
-                            child: Icon(Symbols.movie, size: 48),
-                          ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               }).toList(),
             ),
