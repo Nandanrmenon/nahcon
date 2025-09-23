@@ -3,7 +3,6 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/movie_details_screen.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
 import 'package:nahcon/services/jellyfin_service.dart';
-import 'package:nahcon/utils/constants.dart';
 import 'package:nahcon/widgets/app_logo.dart'; // Import the service
 
 class TopNav extends StatefulWidget implements PreferredSizeWidget {
@@ -185,56 +184,58 @@ class _TopNavState extends State<TopNav> {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width < 400 ||
         MediaQuery.of(context).size.width > 1000;
-    return Container(
-      height: widget.height,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
-        spacing: 16,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            spacing: 8.0,
-            children: [
-              AppLogo(
-                height: 44,
-                width: 44,
-                borderRadius: 10,
-              ),
-              Visibility(
-                  visible: isDesktop,
-                  maintainAnimation: true,
-                  maintainState: true,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                    opacity: isDesktop ? 1 : 0,
-                    child: Text(
-                      'nahCon',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  )),
-            ],
-          ),
-          Material(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(999),
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Row(
-                spacing: 4,
-                mainAxisSize: MainAxisSize.min,
-                children: widget.items
-                    .map((item) => NavItemWidget(item: item))
-                    .toList(),
+    return Material(
+      child: Container(
+        height: widget.height,
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Row(
+          spacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              spacing: 8.0,
+              children: [
+                AppLogo(
+                  height: 44,
+                  width: 44,
+                  borderRadius: 10,
+                ),
+                Visibility(
+                    visible: isDesktop,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      opacity: isDesktop ? 1 : 0,
+                      child: Text(
+                        'nahCon',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    )),
+              ],
+            ),
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(999),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  spacing: 4,
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.items
+                      .map((item) => NavItemWidget(item: item))
+                      .toList(),
+                ),
               ),
             ),
-          ),
-          buildSearch(),
-        ],
+            buildSearch(),
+          ],
+        ),
       ),
     );
   }

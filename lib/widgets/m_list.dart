@@ -7,6 +7,7 @@ class MListItemData {
   final Function onTap;
   final Widget? leading;
   final Widget? suffix;
+  final bool selected;
 
   MListItemData({
     required this.title,
@@ -14,6 +15,7 @@ class MListItemData {
     required this.onTap,
     this.leading,
     this.suffix,
+    this.selected = false,
   });
 }
 
@@ -88,6 +90,7 @@ class _MListViewState extends State<MListView> {
           child: Material(
             color: Theme.of(context).colorScheme.surfaceContainer,
             child: ListTile(
+              contentPadding: EdgeInsets.only(left: 16.0, right: 4.0),
               title: Text(widget.items[index].title),
               leading: widget.items[index].leading,
               subtitle: widget.items[index].subtitle.isNotEmpty
@@ -95,6 +98,7 @@ class _MListViewState extends State<MListView> {
                   : null,
               onTap: () => widget.items[index].onTap(),
               trailing: widget.items[index].suffix,
+              selected: widget.items[index].selected,
             ),
           ),
         );

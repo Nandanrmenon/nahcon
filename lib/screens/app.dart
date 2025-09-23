@@ -2,7 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
-import 'package:nahcon/widgets/navbar.dart';
+import 'package:nahcon/utils/constants.dart';
+import 'package:nahcon/widgets/sidebar.dart';
 
 import '../services/jellyfin_service.dart';
 import 'accounts_screen.dart';
@@ -24,19 +25,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
 
-  bool _isExtended = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _isExtended = false;
-        });
-      }
-    });
-  }
+  // no extended search UI; always show icon-only button
 
   Widget _buildUserAvatar({double size = 24}) {
     return FutureBuilder<bool>(
@@ -80,6 +69,118 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
       ],
     );
 
+    Widget buildBottomNav(Widget search) {
+      return Positioned(
+        bottom: 16,
+        left: 16,
+        right: 16,
+        child: SafeArea(
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 920),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // Home
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        setState(() => _selectedIndex = 0);
+                      },
+                      borderRadius: BorderRadius.circular(999),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Icon(
+                          Symbols.home_rounded,
+                          size: 24,
+                          fill: _selectedIndex == 0 ? 1 : 0,
+                          color: _selectedIndex == 0
+                              ? kAppColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Movies
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        setState(() => _selectedIndex = 1);
+                      },
+                      borderRadius: BorderRadius.circular(999),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Icon(
+                          Symbols.movie_rounded,
+                          size: 24,
+                          fill: _selectedIndex == 1 ? 1 : 0,
+                          color: _selectedIndex == 1
+                              ? kAppColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Series
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        setState(() => _selectedIndex = 2);
+                      },
+                      borderRadius: BorderRadius.circular(999),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Icon(
+                          Symbols.tv_rounded,
+                          size: 24,
+                          fill: _selectedIndex == 2 ? 1 : 0,
+                          color: _selectedIndex == 2
+                              ? kAppColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Account (with long-press)
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setState(() => _selectedIndex = 3),
+                      onLongPress: _showProfileSwitcher,
+                      borderRadius: BorderRadius.circular(999),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildUserAvatar(),
+                            const SizedBox(width: 6),
+                            Icon(
+                              Symbols.expand_all_rounded,
+                              size: 14,
+                              fill: _selectedIndex == 3 ? 1 : 0,
+                              color: _selectedIndex == 3
+                                  ? kAppColor
+                                  : Theme.of(context).iconTheme.color,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Search (last item)
+                  search,
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     Widget buildSearch() {
       final isDesktop = MediaQuery.of(context).size.width < 400 ||
           MediaQuery.of(context).size.width > 1000;
@@ -89,32 +190,12 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
           shrinkWrap: false,
           isFullScreen: true,
           viewBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-          builder: (context, controller) => SizedBox(
-            height: 48,
-            child: FilledButton(
-              onPressed: () {
-                controller.openView();
-              },
-              style: FilledButton.styleFrom(
-                elevation: 2.0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999.0)),
-              ),
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: _isExtended
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 4.0,
-                        children: [
-                          const Icon(Icons.search),
-                          const Text('Search'),
-                        ],
-                      )
-                    : const Icon(Icons.search), // smoothly collapses
-              ),
-            ),
+          builder: (context, controller) => IconButton.filled(
+            visualDensity: VisualDensity(horizontal: 2, vertical: 2),
+            onPressed: () {
+              controller.openView();
+            },
+            icon: const Icon(Icons.search),
           ),
           viewHintText: 'Search for Movies or TV Show',
           dividerColor: Colors.transparent,
@@ -145,7 +226,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 4.0),
                       child: Row(
-                        spacing: 8,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           item.imageUrl != null
                               ? SizedBox(
@@ -169,6 +250,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                                   height: 60,
                                   child: Icon(Symbols.movie),
                                 ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               item.name,
@@ -227,114 +309,37 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
 
     return !isDesktop
         ? Scaffold(
-            body: content,
-            floatingActionButton: buildSearch(),
-            bottomNavigationBar: NavigationBar(
-              labelBehavior:
-                  NavigationDestinationLabelBehavior.onlyShowSelected,
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              destinations: [
-                NavigationDestination(
-                  icon: Icon(Symbols.home_rounded),
-                  selectedIcon: Icon(
-                    Symbols.home_rounded,
-                    fill: 1.0,
-                  ),
-                  label: 'Home',
-                ),
-                NavigationDestination(
-                  icon: Icon(Symbols.movie_rounded),
-                  selectedIcon: Icon(
-                    Symbols.movie_rounded,
-                    fill: 1.0,
-                  ),
-                  label: 'Movies',
-                ),
-                NavigationDestination(
-                  icon: Icon(Symbols.tv_rounded),
-                  selectedIcon: Icon(
-                    Symbols.tv_rounded,
-                    fill: 1.0,
-                  ),
-                  label: 'Series',
-                ),
-                GestureDetector(
-                  onLongPress: _showProfileSwitcher,
-                  child: NavigationDestination(
-                    icon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildUserAvatar(),
-                        const SizedBox(width: 4),
-                        const Icon(Symbols.expand_all_rounded, size: 12),
-                      ],
-                    ),
-                    selectedIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildUserAvatar(),
-                        const SizedBox(width: 4),
-                        const Icon(Symbols.expand_all_rounded, size: 12),
-                      ],
-                    ),
-                    label: 'Account',
-                  ),
-                ),
+            body: Stack(
+              children: [
+                content,
+                buildBottomNav(buildSearch()),
               ],
             ),
           )
         : Scaffold(
-            appBar: TopNav(
-              service: widget.service,
-              items: [
-                NavbarItem(
-                  isSelected: _selectedIndex == 0,
-                  label: 'Home',
-                  onTap: () {
+            body: Row(
+              children: [
+                Sidebar(
+                  service: widget.service,
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (value) {
                     setState(() {
-                      _selectedIndex = 0;
+                      _selectedIndex = value;
                     });
                   },
+                  search: buildSearch(),
+                  accountSwitcher: IconButton(
+                      onPressed: _showProfileSwitcher,
+                      icon: Icon(Symbols.more_vert_rounded)),
                 ),
-                NavbarItem(
-                  isSelected: _selectedIndex == 1,
-                  label: 'Movies',
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                    });
-                  },
-                ),
-                NavbarItem(
-                  isSelected: _selectedIndex == 2,
-                  label: 'Series',
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                    });
-                  },
-                ),
-                NavbarItem(
-                  isSelected: _selectedIndex == 3,
-                  label: 'Me',
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 3;
-                    });
-                  },
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: content,
+                  ),
                 ),
               ],
             ),
-            body: Center(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: content,
-            )),
           );
   }
 
