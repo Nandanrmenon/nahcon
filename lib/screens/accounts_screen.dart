@@ -49,7 +49,17 @@ class AccountsScreen extends StatelessWidget {
         title: 'Logout',
         subtitle: '',
         leading: Icon(Symbols.logout_rounded),
-        onTap: () {},
+        onTap: () async {
+          await service.logout();
+          if (context.mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const LoginScreen(),
+              ),
+              (Route<dynamic> route) => false,
+            );
+          }
+        },
       ),
       MListItemData(
         title: 'Info',
@@ -304,7 +314,6 @@ class AccountsScreen extends StatelessWidget {
               itemSnapping: true,
               enableSplash: false,
               children: items.map((item) {
-                
                 return MovieCard(
                   title: item.name,
                   posterUrl: item.imageUrl != null
