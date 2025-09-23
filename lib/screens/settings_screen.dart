@@ -20,7 +20,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     loadPref();
     super.initState();
-    
   }
 
   Future<void> loadPref() async {
@@ -36,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       MListItemData(
           title: 'Hardware Acceleration',
           subtitle: 'Uses your GPU to render video',
-          suffix: Switch(
+          suffix: Switch.adaptive(
             value: enableHW,
             onChanged: (value) {
               setState(() {

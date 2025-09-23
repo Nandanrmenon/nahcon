@@ -673,7 +673,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const SizedBox(
                       height: 24,
                       width: 24,
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator.adaptive(),
                     )
                   : Text(_serverValidated ? 'Login' : 'Connect'),
             ),

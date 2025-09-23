@@ -148,7 +148,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                   Expanded(
                     child: InkWell(
                       onTap: () => setState(() => _selectedIndex = 3),
-                      onLongPress: _showProfileSwitcher,
+                      onLongPress: () => _showProfileSwitcher(isDesktop),
                       borderRadius: BorderRadius.circular(999),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -329,7 +329,7 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
                   },
                   search: buildSearch(),
                   accountSwitcher: IconButton(
-                      onPressed: _showProfileSwitcher,
+                      onPressed: () => _showProfileSwitcher(isDesktop),
                       icon: Icon(Symbols.more_vert_rounded)),
                 ),
                 Expanded(
@@ -343,101 +343,99 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
           );
   }
 
-  void _showProfileSwitcher() async {
+  Future<void> _showProfileSwitcher(isDesktop) async {
     final profiles = await widget.service.getProfiles();
     if (!mounted) return;
 
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.3,
-        expand: false,
-        builder: (context, scrollController) => CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Switch Account',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
+    Widget switchContent = CustomScrollView(
+      shrinkWrap: true,
+      slivers: [
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Switch Account',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SliverToBoxAdapter(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: profiles.length,
-                itemBuilder: (context, index) {
-                  final profile = profiles[index];
-                  final userImageUrl = profile['userId'] != null
-                      ? '${profile['serverUrl']}/Users/${profile['userId']}/Images/Primary'
-                      : null;
-                  return ListTile(
-                    leading: userImageUrl != null
-                        ? CircleAvatar(
-                            backgroundImage: null,
-                            child: ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: userImageUrl,
-                                httpHeaders: widget.service.getVideoHeaders(),
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.account_circle),
-                                placeholder: (context, url) =>
-                                    const Icon(Icons.account_circle),
-                              ),
-                            ),
-                          )
-                        : const Icon(Icons.account_circle),
-                    title: Text(profile['username']),
-                    subtitle:
-                        Text(profile['serverName'] ?? profile['serverUrl']),
-                    onTap: () async {
-                      await widget.service.setCurrentProfile(profile['id']);
-                      final success = await widget.service.tryAutoLogin();
-                      if (success && mounted) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  App(service: widget.service),
-                            ),
-                            (Route<dynamic> route) => false);
-                      }
-                    },
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: profiles.length,
+            itemBuilder: (context, index) {
+              final profile = profiles[index];
+              final userImageUrl = profile['userId'] != null
+                  ? '${profile['serverUrl']}/Users/${profile['userId']}/Images/Primary'
+                  : null;
+              return ListTile(
+                leading: userImageUrl != null
+                    ? CircleAvatar(
+                        backgroundImage: null,
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: userImageUrl,
+                            httpHeaders: widget.service.getVideoHeaders(),
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.account_circle),
+                            placeholder: (context, url) =>
+                                const Icon(Icons.account_circle),
+                          ),
+                        ),
+                      )
+                    : const Icon(Icons.account_circle),
+                title: Text(profile['username']),
+                subtitle: Text(profile['serverName'] ?? profile['serverUrl']),
+                onTap: () async {
+                  await widget.service.setCurrentProfile(profile['id']);
+                  final success = await widget.service.tryAutoLogin();
+                  if (success && mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => App(service: widget.service),
+                        ),
+                        (Route<dynamic> route) => false);
+                  }
+                },
+              );
+            },
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SizedBox(
+              height: 48,
+              child: FilledButton.tonalIcon(
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
                   );
                 },
+                icon: const Icon(Symbols.add),
+                label: const Text('Add Account'),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  height: 48,
-                  child: FilledButton.tonalIcon(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Symbols.add),
-                    label: const Text('Add Account'),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
+    );
+
+    showAdaptiveDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+          alignment: isDesktop ? Alignment.center : Alignment.bottomCenter,
+          constraints: BoxConstraints(
+            maxWidth: isDesktop ? 500 : double.maxFinite,
+          ),
+          child: switchContent),
     );
   }
 }
