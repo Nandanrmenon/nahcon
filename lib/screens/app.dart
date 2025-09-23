@@ -1,8 +1,9 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:nahcon/screens/series_details_screen.dart';
-import 'package:nahcon/utils/constants.dart';
 import 'package:nahcon/widgets/sidebar.dart';
 
 import '../services/jellyfin_service.dart';
@@ -75,105 +76,121 @@ class _AppState extends State<App> with SingleTickerProviderStateMixin {
         left: 16,
         right: 16,
         child: SafeArea(
-          child: Material(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+          child: ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 920),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  // Home
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() => _selectedIndex = 0);
-                      },
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Icon(
-                          Symbols.home_rounded,
-                          size: 24,
-                          fill: _selectedIndex == 0 ? 1 : 0,
-                          color: _selectedIndex == 0
-                              ? kAppColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                    ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5), // Blur effect
+              child: Material(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainer
+                    .withAlpha(200),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    width: 1,
                   ),
-                  // Movies
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() => _selectedIndex = 1);
-                      },
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Icon(
-                          Symbols.movie_rounded,
-                          size: 24,
-                          fill: _selectedIndex == 1 ? 1 : 0,
-                          color: _selectedIndex == 1
-                              ? kAppColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Series
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() => _selectedIndex = 2);
-                      },
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Icon(
-                          Symbols.tv_rounded,
-                          size: 24,
-                          fill: _selectedIndex == 2 ? 1 : 0,
-                          color: _selectedIndex == 2
-                              ? kAppColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Account (with long-press)
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => setState(() => _selectedIndex = 3),
-                      onLongPress: () => _showProfileSwitcher(isDesktop),
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildUserAvatar(),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Symbols.expand_all_rounded,
-                              size: 14,
-                              fill: _selectedIndex == 3 ? 1 : 0,
-                              color: _selectedIndex == 3
-                                  ? kAppColor
+                ),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 920),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      // Home
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() => _selectedIndex = 0);
+                          },
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Icon(
+                              Symbols.home_rounded,
+                              size: 24,
+                              fill: _selectedIndex == 0 ? 1 : 0,
+                              color: _selectedIndex == 0
+                                  ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context).iconTheme.color,
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+                      // Movies
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() => _selectedIndex = 1);
+                          },
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Icon(
+                              Symbols.movie_rounded,
+                              size: 24,
+                              fill: _selectedIndex == 1 ? 1 : 0,
+                              color: _selectedIndex == 1
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).iconTheme.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Series
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() => _selectedIndex = 2);
+                          },
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Icon(
+                              Symbols.tv_rounded,
+                              size: 24,
+                              fill: _selectedIndex == 2 ? 1 : 0,
+                              color: _selectedIndex == 2
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).iconTheme.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Account (with long-press)
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedIndex = 3),
+                          onLongPress: () => _showProfileSwitcher(isDesktop),
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildUserAvatar(),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Symbols.expand_all_rounded,
+                                  size: 14,
+                                  fill: _selectedIndex == 3 ? 1 : 0,
+                                  color: _selectedIndex == 3
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).iconTheme.color,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Search (last item)
+                      search,
+                    ],
                   ),
-                  // Search (last item)
-                  search,
-                ],
+                ),
               ),
             ),
           ),
