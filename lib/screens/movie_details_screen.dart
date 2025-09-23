@@ -74,7 +74,7 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator.adaptive(),
             );
           }
 
@@ -120,24 +120,62 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                     tag: 'movie-title-${widget.movie.id}',
                     child: Material(
                       type: MaterialType.transparency,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            widget.movie.name,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.movie.name,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              if (movieDetails.year != null)
+                                Text(
+                                  widget.movie.year.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
+                                ),
+                            ],
                           ),
-                          if (movieDetails.year != null)
-                            Text(
-                              widget.movie.year.toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant),
+                          IconButton(
+                            onPressed: () async {
+                              final newFavorite = !movieDetails.isFavorite;
+                              try {
+                                await widget.service
+                                    .setFavorite(movieDetails.id, newFavorite);
+                                // Clear cached item details so next fetch is fresh
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs
+                                    .remove('item_details_${movieDetails.id}');
+                                setState(() {
+                                  isFavorite = newFavorite;
+                                  _movieDetailsFuture = widget.service
+                                      .getItemDetails(widget.movie.id);
+                                });
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Failed to update favorite: $e')),
+                                );
+                              }
+                            },
+                            icon: Icon(
+                              Symbols.favorite,
+                              fill: isFavorite ? 1 : 0,
+                              color: isFavorite
+                                  ? Colors.redAccent
+                                  : Theme.of(context).iconTheme.color,
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -317,24 +355,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               ),
                             ),
                           );
-                          // return MovieCard(
-                          //   title: movie.name,
-                          //   onTap: () {
-                          //     Navigator.push(
-                          //       context,
-                          //       MaterialPageRoute(
-                          //         builder: (context) => MovieDetailsScreen(
-                          //           movie: movie,
-                          //           service: widget.service,
-                          //         ),
-                          //       ),
-                          //     );
-                          //   },
-                          //   posterUrl: movie.imageUrl != null
-                          //       ? widget.service.getImageUrl(movie.imageUrl)
-                          //       : null,
-                          //   rating: movie.rating,
-                          // );
                         },
                       );
                     },
@@ -545,35 +565,6 @@ class _MovieDetailsState extends State<MovieDetailsScreen> {
                               icon: const Icon(Symbols.play_arrow),
                               label: const Text('Play'),
                             ),
-                          ),
-                        ),
-                        IconButton.filled(
-                          onPressed: () async {
-                            final newFavorite = !movieDetails.isFavorite;
-                            try {
-                              await widget.service
-                                  .setFavorite(movieDetails.id, newFavorite);
-                              // Clear cached item details so next fetch is fresh
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs
-                                  .remove('item_details_${movieDetails.id}');
-                              setState(() {
-                                isFavorite = newFavorite;
-                                _movieDetailsFuture = widget.service
-                                    .getItemDetails(widget.movie.id);
-                              });
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content:
-                                        Text('Failed to update favorite: $e')),
-                              );
-                            }
-                          },
-                          icon: Icon(
-                            Symbols.favorite,
-                            fill: isFavorite ? 1 : 0,
                           ),
                         ),
                         Tooltip(
