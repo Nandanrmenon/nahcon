@@ -127,15 +127,20 @@ class _MovieCardState extends State<MovieCard> {
                       .copyWith(fontWeight: FontWeight.w600),
                 ),
                 if (widget.rating != null)
-                  Row(
-                    children: [
-                      const Icon(Symbols.star, color: Colors.amber, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.rating!.toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                  Flexible(
+                    child: Row(
+                      children: [
+                        const Icon(Symbols.star, color: Colors.amber, size: 16),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            widget.rating!.toStringAsFixed(1),
+                            maxLines: 1,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 if (widget.rating == null)
                   SizedBox(
